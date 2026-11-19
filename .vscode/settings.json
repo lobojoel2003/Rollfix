@@ -1,0 +1,12 @@
+{
+	"yaml.schemas": {
+		"./schema/jurisdiction.schema.json": ["rules/states/*.yaml", "rules/federal.yaml"],
+		"./schema/letter.schema.json": "letters/*.yaml",
+		"./schema/holidays.schema.json": "rules/holidays/*.yaml"
+	},
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"[svelte]": { "editor.defaultFormatter": "svelte.svelte-vscode" },
+	"[python]": { "editor.defaultFormatter": "charliermarsh.ruff" },
+	"files.associations": { "*.yaml": "yaml" }
+}

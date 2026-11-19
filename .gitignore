@@ -1,0 +1,27 @@
+node_modules/
+/build/
+/.svelte-kit/
+/package/
+/dist/
+/coverage/
+/test-results/
+/playwright-report/
+/blob-report/
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+*.log
+vite.config.ts.timestamp-*
+
+# Python (api/)
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/

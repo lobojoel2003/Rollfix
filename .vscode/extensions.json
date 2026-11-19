@@ -1,0 +1,9 @@
+{
+	"recommendations": [
+		"svelte.svelte-vscode",
+		"redhat.vscode-yaml",
+		"dbaeumer.vscode-eslint",
+		"esbenp.prettier-vscode",
+		"charliermarsh.ruff"
+	]
+}

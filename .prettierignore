@@ -1,0 +1,13 @@
+node_modules
+build
+dist
+.svelte-kit
+coverage
+test-results
+playwright-report
+package-lock.json
+LICENSE
+rules/LICENSE.md
+schema/*.schema.json
+CHANGELOG.md
+api
