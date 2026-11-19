@@ -1,0 +1,32 @@
+# Local development stack for the optional stats API:
+#   docker compose up --build
+# then run the app against it:
+#   PUBLIC_STATS_API=http://localhost:8000 npm run dev
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: rollfix
+      POSTGRES_PASSWORD: rollfix
+      POSTGRES_DB: rollfix
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rollfix"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./api
+    environment:
+      ROLLFIX_DATABASE_URL: postgresql://rollfix:rollfix@db:5432/rollfix
+      ROLLFIX_ALLOWED_ORIGINS: http://localhost:5173,http://localhost:4173
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:
