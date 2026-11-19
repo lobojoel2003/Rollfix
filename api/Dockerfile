@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Rollfix stats API. Build from the api/ directory:
 #   docker build -t rollfix-api api/
-FROM python:3.13-slim AS build
+FROM python:3.15-slim AS build
 RUN pip install --no-cache-dir --root-user-action=ignore "uv==0.11.*"
 WORKDIR /app
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never
@@ -10,7 +10,7 @@ RUN uv sync --frozen --no-dev --no-install-project
 COPY rollfix_api ./rollfix_api
 RUN uv sync --frozen --no-dev --no-editable
 
-FROM python:3.13-slim
+FROM python:3.15-slim
 ARG VERSION=dev
 ARG BUILD_NUMBER=dev
 ARG COMMIT=unknown
