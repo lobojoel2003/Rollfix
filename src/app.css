@@ -1,0 +1,662 @@
+/*
+ * Rollfix styles. No web fonts or frameworks: the app has to load fast on old phones, work
+ * offline, and stay readable at 200% zoom, with high contrast and large touch and switch
+ * targets (at least 48px).
+ */
+
+:root {
+	color-scheme: light;
+	--bg: #f4f5f9;
+	--surface: #ffffff;
+	--surface-2: #eaecf3;
+	--text: #151a2d;
+	--muted: #4a5167;
+	--border: #d3d7e3;
+	--border-strong: #7f879e;
+	--primary: #2a3b9c;
+	--primary-hover: #1d2b7a;
+	--primary-soft: #e4e8fb;
+	--on-primary: #ffffff;
+	--focus: #b4530a;
+	--danger: #a3241a;
+	--danger-soft: #fbe8e6;
+	--warning: #7d5000;
+	--warning-soft: #fff1cc;
+	--success: #19683d;
+	--success-soft: #e1f3e7;
+	--highlight: #fff0b3;
+	/* Chart marks: one series, validated for contrast and lightness (see docs/ARCHITECTURE.md). */
+	--chart-1: #3f55c8;
+	--chart-1-hover: #2f43a8;
+	--chart-track: #e1e5f6;
+	--shadow: 0 1px 2px rgb(21 26 45 / 6%), 0 6px 20px rgb(21 26 45 / 7%);
+	--radius: 14px;
+	--radius-sm: 9px;
+	--target: 3rem;
+	--font:
+		system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+	--font-letter: Georgia, 'Times New Roman', 'Noto Serif', serif;
+	--content: 68rem;
+	--reading: 44rem;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		color-scheme: dark;
+		--bg: #0f1220;
+		--surface: #181c2e;
+		--surface-2: #222740;
+		--text: #e8eaf3;
+		--muted: #aab0c6;
+		--border: #30364f;
+		--border-strong: #737b98;
+		--primary: #a9b6ff;
+		--primary-hover: #c8d0ff;
+		--primary-soft: #232b55;
+		--on-primary: #0d1233;
+		--focus: #ffc46b;
+		--danger: #ff958a;
+		--danger-soft: #3b1d1d;
+		--warning: #f6c766;
+		--warning-soft: #352a10;
+		--success: #84d8a4;
+		--success-soft: #14301f;
+		--highlight: #4d4210;
+		--chart-1: #7387ec;
+		--chart-1-hover: #93a3f3;
+		--chart-track: #262c4a;
+		--shadow: 0 1px 2px rgb(0 0 0 / 35%), 0 6px 20px rgb(0 0 0 / 30%);
+	}
+}
+
+/* The text size setting (Settings → Text size). Browser zoom works too. */
+html[data-text-size='large'] {
+	font-size: 112.5%;
+}
+
+html[data-text-size='x-large'] {
+	font-size: 125%;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--text);
+	font-family: var(--font);
+	font-size: 1.0625rem;
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+	line-height: 1.2;
+	margin: 0 0 0.5em;
+	text-wrap: balance;
+}
+
+h1 {
+	font-size: clamp(1.9rem, 1.4rem + 2.2vw, 2.7rem);
+	letter-spacing: -0.02em;
+}
+
+h2 {
+	font-size: clamp(1.35rem, 1.2rem + 0.8vw, 1.65rem);
+	letter-spacing: -0.01em;
+}
+
+h3 {
+	font-size: 1.15rem;
+}
+
+p,
+ul,
+ol,
+dl {
+	margin: 0 0 1em;
+}
+
+a {
+	color: var(--primary);
+	text-underline-offset: 0.18em;
+	text-decoration-thickness: 1px;
+}
+
+a:hover {
+	color: var(--primary-hover);
+	text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+	outline: 3px solid var(--focus);
+	outline-offset: 3px;
+	border-radius: 6px;
+}
+
+/* Headings and regions that receive focus after a save or navigation. */
+[tabindex='-1']:focus {
+	outline: none;
+}
+
+[tabindex='-1']:focus-visible {
+	outline: 3px solid var(--focus);
+}
+
+img,
+svg {
+	max-width: 100%;
+}
+
+.container {
+	width: 100%;
+	max-width: var(--content);
+	margin-inline: auto;
+	padding-inline: 1rem;
+}
+
+@media (min-width: 40rem) {
+	.container {
+		padding-inline: 1.5rem;
+	}
+}
+
+.reading {
+	max-width: var(--reading);
+}
+
+.lead {
+	font-size: 1.2rem;
+	color: var(--muted);
+}
+
+.muted {
+	color: var(--muted);
+}
+
+.small {
+	font-size: 0.92rem;
+}
+
+.visually-hidden {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.skip-link {
+	position: absolute;
+	inset-inline-start: 1rem;
+	top: -10rem;
+	z-index: 100;
+	padding: 0.75rem 1.25rem;
+	background: var(--surface);
+	color: var(--primary);
+	font-weight: 700;
+	border: 3px solid var(--focus);
+	border-radius: var(--radius-sm);
+}
+
+.skip-link:focus {
+	top: 1rem;
+}
+
+section {
+	margin-block: 2.5rem;
+}
+
+.page {
+	padding-block: 2rem 1rem;
+}
+
+/* Cards */
+.card {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	padding: 1.25rem;
+	box-shadow: var(--shadow);
+}
+
+.card > :last-child {
+	margin-bottom: 0;
+}
+
+.grid {
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--min, 16rem)), 1fr));
+	padding: 0;
+	list-style: none;
+}
+
+/* Buttons: at least 48px tall, with text, never icon-only. */
+.button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.55rem;
+	min-height: var(--target);
+	padding: 0.6rem 1.2rem;
+	border: 2px solid var(--primary);
+	border-radius: 999px;
+	background: var(--primary);
+	color: var(--on-primary);
+	font: inherit;
+	font-weight: 650;
+	line-height: 1.2;
+	text-align: center;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.button:hover {
+	background: var(--primary-hover);
+	border-color: var(--primary-hover);
+	color: var(--on-primary);
+}
+
+.button.secondary {
+	background: var(--surface);
+	color: var(--primary);
+}
+
+.button.secondary:hover {
+	background: var(--primary-soft);
+	color: var(--primary-hover);
+}
+
+.button.quiet {
+	background: transparent;
+	border-color: transparent;
+	color: var(--primary);
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+}
+
+.button.quiet:hover {
+	background: var(--primary-soft);
+}
+
+.button.danger {
+	background: var(--surface);
+	border-color: var(--danger);
+	color: var(--danger);
+}
+
+.button.danger:hover {
+	background: var(--danger-soft);
+}
+
+.button.big {
+	min-height: 3.5rem;
+	padding-inline: 1.6rem;
+	font-size: 1.1rem;
+}
+
+.button[disabled],
+.button[aria-disabled='true'] {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.button-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	align-items: center;
+}
+
+/* Badges */
+.badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	padding: 0.1rem 0.6rem;
+	border-radius: 999px;
+	font-size: 0.85rem;
+	font-weight: 650;
+	line-height: 1.6;
+	white-space: nowrap;
+	background: var(--surface-2);
+	color: var(--muted);
+	border: 1px solid transparent;
+}
+
+.badge.danger {
+	background: var(--danger-soft);
+	color: var(--danger);
+	border-color: currentColor;
+}
+
+.badge.warning {
+	background: var(--warning-soft);
+	color: var(--warning);
+	border-color: currentColor;
+}
+
+.badge.success {
+	background: var(--success-soft);
+	color: var(--success);
+	border-color: currentColor;
+}
+
+.badge.info {
+	background: var(--primary-soft);
+	color: var(--primary);
+	border-color: currentColor;
+}
+
+/* Forms */
+label,
+legend {
+	font-weight: 650;
+}
+
+input,
+select,
+textarea {
+	font: inherit;
+	color: var(--text);
+	background: var(--surface);
+	border: 2px solid var(--border-strong);
+	border-radius: var(--radius-sm);
+	padding: 0.6rem 0.75rem;
+	width: 100%;
+	min-height: var(--target);
+}
+
+textarea {
+	min-height: 7rem;
+	resize: vertical;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+	width: 1.5rem;
+	height: 1.5rem;
+	min-height: 0;
+	margin: 0.1rem 0 0;
+	accent-color: var(--primary);
+	flex: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+	border-color: var(--primary);
+}
+
+/* Text fields always show the ring while focused, including the parts of date and time
+   pickers that live inside the input (month, day, year, calendar button). */
+input:not([type='checkbox'], [type='radio']):focus,
+select:focus,
+textarea:focus {
+	outline: 3px solid var(--focus);
+	outline-offset: 2px;
+}
+
+input::-webkit-calendar-picker-indicator {
+	padding: 0.35rem;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+input::-webkit-calendar-picker-indicator:focus-visible {
+	outline: 3px solid var(--focus);
+	outline-offset: 1px;
+}
+
+[aria-invalid='true'] {
+	border-color: var(--danger);
+}
+
+fieldset {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	min-width: 0;
+}
+
+.field + .field,
+.field + fieldset,
+fieldset + .field,
+fieldset + fieldset {
+	margin-top: 1.5rem;
+}
+
+.help {
+	display: block;
+	margin: 0.15rem 0 0.45rem;
+	color: var(--muted);
+	font-size: 0.95rem;
+	font-weight: 400;
+}
+
+.error-text {
+	color: var(--danger);
+	font-weight: 650;
+	margin: 0.35rem 0 0;
+	font-size: 0.95rem;
+}
+
+.input-short {
+	max-width: 15rem;
+}
+
+/* A whole-row choice: the label is the target, so it is easy to hit with a switch or finger. */
+.choice {
+	display: flex;
+	gap: 0.75rem;
+	align-items: flex-start;
+	min-height: var(--target);
+	padding: 0.7rem 0.85rem;
+	font-weight: 500;
+	border: 2px solid var(--border);
+	border-radius: var(--radius-sm);
+	background: var(--surface);
+	cursor: pointer;
+}
+
+.choice:hover {
+	border-color: var(--border-strong);
+}
+
+.choice:has(input:checked) {
+	border-color: var(--primary);
+	background: var(--primary-soft);
+}
+
+.choice:has(input:focus-visible) {
+	outline: 3px solid var(--focus);
+	outline-offset: 2px;
+}
+
+.choice input:focus-visible {
+	outline: none;
+}
+
+.choice .hint {
+	display: block;
+	color: var(--muted);
+	font-size: 0.92rem;
+}
+
+.choices {
+	display: grid;
+	gap: 0.5rem;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--min, 17rem)), 1fr));
+	margin-top: 0.5rem;
+}
+
+/* Callouts */
+.notice {
+	border-radius: var(--radius);
+	padding: 1rem 1.15rem;
+	border: 1px solid var(--border);
+	background: var(--surface);
+	border-inline-start: 6px solid var(--primary);
+}
+
+.notice > :last-child {
+	margin-bottom: 0;
+}
+
+.notice.warning {
+	background: var(--warning-soft);
+	border-color: var(--warning);
+}
+
+.notice.danger {
+	background: var(--danger-soft);
+	border-color: var(--danger);
+}
+
+.notice.success {
+	background: var(--success-soft);
+	border-color: var(--success);
+}
+
+.notice.info {
+	background: var(--primary-soft);
+	border-color: var(--primary);
+}
+
+details > summary {
+	cursor: pointer;
+	font-weight: 650;
+	color: var(--primary);
+	min-height: var(--target);
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+dl.facts {
+	display: grid;
+	grid-template-columns: minmax(8rem, max-content) 1fr;
+	gap: 0.35rem 1.25rem;
+}
+
+dl.facts dt {
+	font-weight: 650;
+	color: var(--muted);
+}
+
+dl.facts dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+@media (max-width: 30rem) {
+	dl.facts {
+		grid-template-columns: 1fr;
+	}
+
+	dl.facts dd {
+		margin-bottom: 0.5rem;
+	}
+}
+
+table {
+	border-collapse: collapse;
+	width: 100%;
+	font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+	text-align: start;
+	padding: 0.55rem 0.75rem;
+	border-bottom: 1px solid var(--border);
+	vertical-align: top;
+}
+
+th {
+	font-weight: 650;
+}
+
+td.number,
+th.number {
+	text-align: end;
+}
+
+.table-scroll {
+	overflow-x: auto;
+}
+
+@media (forced-colors: active) {
+	.button,
+	.choice,
+	.badge,
+	.card,
+	.notice {
+		border: 2px solid CanvasText;
+	}
+
+	.choice:has(input:checked) {
+		outline: 3px solid Highlight;
+	}
+}
+
+/* Print: only the content that matters. */
+@media print {
+	:root {
+		--bg: #fff;
+		--surface: #fff;
+		--text: #000;
+		--muted: #333;
+		--shadow: none;
+	}
+
+	body {
+		font-size: 11pt;
+	}
+
+	.no-print,
+	header.site,
+	footer.site,
+	nav,
+	.button,
+	.button-row,
+	.skip-link {
+		display: none !important;
+	}
+
+	.card {
+		border-color: #999;
+		box-shadow: none;
+	}
+
+	a {
+		color: #000;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		transition: none !important;
+		animation: none !important;
+		scroll-behavior: auto !important;
+	}
+}
