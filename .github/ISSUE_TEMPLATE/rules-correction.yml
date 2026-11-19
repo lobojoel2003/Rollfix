@@ -1,0 +1,24 @@
+name: Rules correction or new law
+description: A state rule is wrong or out of date, or a state passed a new wheelchair repair law
+labels: [rules]
+body:
+  - type: input
+    id: state
+    attributes:
+      label: State
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What should change?
+      description: The bill or statute, what it requires, and when it took effect.
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Official source
+      description: A link to the statute, session law or legislature page.
+    validations:
+      required: true

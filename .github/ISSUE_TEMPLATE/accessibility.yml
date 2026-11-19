@@ -1,0 +1,19 @@
+name: Accessibility barrier
+description: Something is hard or impossible to use with a keyboard, switch, screen reader, magnifier or voice control
+labels: [accessibility]
+body:
+  - type: textarea
+    id: barrier
+    attributes:
+      label: What got in your way?
+    validations:
+      required: true
+  - type: input
+    id: tools
+    attributes:
+      label: Assistive technology, browser and device
+      placeholder: e.g. Switch Control on iPad, JAWS with Edge, Dragon, 400% zoom
+  - type: input
+    id: page
+    attributes:
+      label: Which page?

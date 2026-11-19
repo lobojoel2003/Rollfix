@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: I need help with my own repair
+    url: https://www.ndrn.org/about/ndrn-member-agencies/
+    about: Issues here can't give legal advice. Your state's Protection and Advocacy organization helps people with disabilities for free.
+  - name: Rules guide (add or fix a state)
+    url: https://github.com/lobojoel2003/Rollfix/blob/main/rules/README.md
+    about: How the state rules and letter templates are written, with examples.

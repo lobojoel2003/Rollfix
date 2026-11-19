@@ -1,0 +1,10 @@
+name: Idea
+description: Suggest something that would help wheelchair users or advocates
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help, and who?
+    validations:
+      required: true

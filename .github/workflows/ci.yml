@@ -1,0 +1,240 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  FORCE_COLOR: "1"
+
+jobs:
+  web:
+    name: Web · lint, types, rules, unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Formatting and lint
+        run: npm run lint
+      - name: Type-check (app and service worker)
+        run: npm run check
+      - name: Validate state rules and letters
+        run: npm run rules:validate
+      - name: JSON Schemas are up to date
+        run: npm run rules:schema -- --check
+      - name: Versions agree (web, API, changelog)
+        run: npm run version:check
+      - name: Unit tests with coverage
+        run: npm run test:coverage
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage-web
+          path: coverage/
+          retention-days: 14
+
+  build:
+    name: Web · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the build number is the commit count
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Build summary
+        run: |
+          {
+            echo "### Web build"
+            echo '```json'
+            cat build/build-info.json
+            echo ''
+            echo '```'
+            echo "Pages: $(find build -name index.html | wc -l) · Size: $(du -sh build | cut -f1)"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: site
+          path: build/
+          retention-days: 7
+
+  api:
+    name: API · lint, types, tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: api
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: rollfix
+          POSTGRES_PASSWORD: rollfix
+          POSTGRES_DB: rollfix_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U rollfix"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ROLLFIX_TEST_DATABASE_URL: postgresql://rollfix:rollfix@localhost:5432/rollfix_test
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: api/uv.lock
+      - run: uv sync --locked
+      - name: Lint
+        run: uv run ruff check --output-format=github .
+      - name: Formatting
+        run: uv run ruff format --check .
+      - name: Type-check (mypy --strict)
+        run: uv run mypy rollfix_api tests
+      - name: Tests with coverage
+        run: uv run pytest --cov --cov-report=term-missing --cov-report=xml
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage-api
+          path: api/coverage.xml
+          retention-days: 14
+
+  container:
+    name: API · container image
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: rollfix
+          POSTGRES_PASSWORD: rollfix
+          POSTGRES_DB: rollfix
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U rollfix"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: docker/setup-buildx-action@v4
+      - name: Build the image
+        uses: docker/build-push-action@v7
+        with:
+          context: api
+          load: true
+          tags: rollfix-api:ci
+          build-args: |
+            VERSION=ci
+            BUILD_NUMBER=${{ github.run_number }}
+            COMMIT=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Smoke test the image against PostgreSQL
+        run: |
+          docker run -d --name api --network host \
+            -e ROLLFIX_DATABASE_URL=postgresql://rollfix:rollfix@localhost:5432/rollfix \
+            rollfix-api:ci
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8000/readyz; then break; fi
+            sleep 1
+          done
+          curl -fsS http://localhost:8000/readyz
+          curl -fsS http://localhost:8000/v1/version | tee version.json
+          grep -q '"build":"${{ github.run_number }}"' version.json
+          test "$(docker inspect --format '{{.Config.User}}' rollfix-api:ci)" = "rollfix"
+      - name: Container logs
+        if: always()
+        run: docker logs api || true
+
+  e2e:
+    name: End-to-end (app + API, axe accessibility)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: rollfix
+          POSTGRES_PASSWORD: rollfix
+          POSTGRES_DB: rollfix
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U rollfix"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ROLLFIX_DATABASE_URL: postgresql://rollfix:rollfix@localhost:5432/rollfix
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: api/uv.lock
+      - run: uv sync --locked --no-dev
+        working-directory: api
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+      - name: Build the app, connected to the local stats API
+        run: npm run build
+        env:
+          PUBLIC_STATS_API: http://localhost:8000
+      - name: Run the end-to-end tests
+        run: npm run test:e2e -- --trace off
+        env:
+          E2E_START_API: "1"
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Audit web runtime dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - uses: astral-sh/setup-uv@v7
+      - name: Audit API runtime dependencies
+        working-directory: api
+        run: |
+          uv export --locked --no-dev --no-hashes --no-emit-project --format requirements-txt > requirements.txt
+          uvx pip-audit --strict -r requirements.txt

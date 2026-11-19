@@ -1,0 +1,25 @@
+name: Something isn't working
+description: A bug in the app, a letter, a PDF or the stats API
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Please don't include personal details from your repair log.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+  - type: input
+    id: device
+    attributes:
+      label: Device, browser and assistive technology
+      placeholder: e.g. iPhone 13, Safari, VoiceOver / Windows, Chrome, NVDA / switch access
+  - type: input
+    id: version
+    attributes:
+      label: Rollfix version
+      description: Shown at the bottom of every page, e.g. "Rollfix 1.0.0 · build 42".
