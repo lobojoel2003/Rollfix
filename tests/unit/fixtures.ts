@@ -86,6 +86,7 @@ export function jurisdiction(overrides: Partial<Jurisdiction> = {}): Jurisdictio
 				description: 'Within 3 business days of the report.',
 				starts: { events: ['reported'], when: 'first', label: 'you reported the problem' },
 				period: { days: 3, count: 'business' },
+				pauses: [],
 				met_by: ['visit'],
 				met_label: 'a technician visit',
 				recipients: ['supplier', 'agency'],
@@ -100,10 +101,11 @@ export function jurisdiction(overrides: Partial<Jurisdiction> = {}): Jurisdictio
 				description: 'Within 10 days after approval.',
 				starts: {
 					events: ['auth_approved', 'parts_arrived'],
-					when: 'latest',
+					when: 'all',
 					label: 'approval and parts'
 				},
 				period: { days: 10, count: 'calendar' },
+				pauses: [],
 				met_by: ['repaired'],
 				met_label: 'the repair',
 				recipients: ['supplier', 'insurer', 'agency'],
@@ -117,6 +119,7 @@ export function jurisdiction(overrides: Partial<Jurisdiction> = {}): Jurisdictio
 				description: 'Decide quickly.',
 				starts: { events: ['auth_requested'], when: 'first', label: 'the request' },
 				period: { days: 5, count: 'calendar' },
+				pauses: [],
 				met_by: ['auth_approved', 'auth_denied'],
 				met_label: 'a decision',
 				applies_if: { payers: ['medicaid'] },
@@ -164,3 +167,26 @@ export function jurisdiction(overrides: Partial<Jurisdiction> = {}): Jurisdictio
 		...overrides
 	};
 }
+
+/** A Connecticut-style clock: 10 business days that pause while waiting for approval or parts. */
+export const TIMELY: Jurisdiction['deadlines'][number] = {
+	id: 'timely',
+	law: 'repair-act',
+	title: 'Timely repair',
+	who: 'supplier',
+	description: '10 business days, not counting waits.',
+	starts: { events: ['reported'], when: 'first', label: 'you asked' },
+	period: { days: 10, count: 'business' },
+	pauses: [
+		{
+			from: 'auth_requested',
+			until: ['auth_approved', 'auth_denied'],
+			label: 'waiting for approval'
+		},
+		{ from: 'parts_ordered', until: ['parts_arrived'], label: 'waiting for parts' }
+	],
+	met_by: ['repaired'],
+	met_label: 'the repair',
+	recipients: ['supplier'],
+	letter: '{{days_used}} used; paused for {{paused_for}} since {{paused_since}}.'
+};

@@ -5,10 +5,13 @@ import {
 	lawInForce,
 	matchesConditions,
 	rulesFor,
+	calendarFor,
+	pausesFor,
+	runClock,
 	startDate,
 	STATUS_LABELS
 } from '../../src/lib/engine/rules.ts';
-import { entry, jurisdiction, repair } from './fixtures.ts';
+import { entry, jurisdiction, repair, TIMELY } from './fixtures.ts';
 
 const zz = jurisdiction();
 const assess = zz.deadlines[0]!;
@@ -58,7 +61,7 @@ describe('deadline checks', () => {
 		});
 	});
 
-	it('starts "latest" clocks only once every event has happened', () => {
+	it('starts "all" clocks only once every event has happened', () => {
 		const approved = repair({ entries: [entry('2026-11-05', 'auth_approved')] });
 		expect(startDate(repairDeadline, approved)).toBeUndefined();
 		const both = repair({
@@ -119,7 +122,7 @@ describe('deadline checks', () => {
 	});
 
 	it('has a label for every status', () => {
-		expect(Object.keys(STATUS_LABELS)).toHaveLength(7);
+		expect(Object.keys(STATUS_LABELS)).toHaveLength(8);
 	});
 });
 
@@ -164,5 +167,124 @@ describe('rules for a repair', () => {
 		const { deadlines } = rulesFor(r, zz, undefined, '2026-11-19');
 		expect(deadlinesForLetter(deadlines, 'supplier').map((c) => c.deadline.id)).toEqual(['assess']);
 		expect(deadlinesForLetter(deadlines, 'insurer')).toEqual([]);
+	});
+});
+
+describe('clocks that pause', () => {
+	const zz = jurisdiction();
+	const asked = entry('2026-11-02', 'reported');
+
+	it('stops counting while waiting for approval', () => {
+		const r = repair({ entries: [asked, entry('2026-11-05', 'auth_requested')] });
+		expect(checkDeadline(TIMELY, zz, r, '2026-11-19')).toMatchObject({
+			status: 'paused',
+			start: '2026-11-02',
+			daysUsed: 2,
+			pausedSince: '2026-11-05',
+			pausedFor: 'waiting for approval'
+		});
+	});
+
+	it('picks up again when the wait ends, skipping every day of it', () => {
+		const r = repair({
+			entries: [asked, entry('2026-11-05', 'auth_requested'), entry('2026-11-10', 'auth_approved')]
+		});
+		// 2 business days before the wait (Nov 3, 4), then Nov 11 to Nov 20 for the other 8.
+		expect(checkDeadline(TIMELY, zz, r, '2026-11-19')).toMatchObject({
+			status: 'running',
+			due: '2026-11-20',
+			daysLeft: 1,
+			daysUsed: 9
+		});
+		expect(checkDeadline(TIMELY, zz, r, '2026-11-23')).toMatchObject({
+			status: 'missed',
+			daysLate: 3
+		});
+	});
+
+	it('handles several pauses and waits for parts', () => {
+		const r = repair({
+			entries: [
+				asked,
+				entry('2026-11-03', 'auth_requested'),
+				entry('2026-11-04', 'auth_approved'),
+				entry('2026-11-06', 'parts_ordered'),
+				entry('2026-11-16', 'parts_arrived')
+			]
+		});
+		// Nov 3-4 and Nov 6-16 don't count: Nov 5, then Nov 17 onwards.
+		expect(checkDeadline(TIMELY, zz, r, '2026-11-17').due).toBe('2026-11-30');
+	});
+
+	it('is met when the repair happens during a pause', () => {
+		const r = repair({
+			fixedOn: '2026-11-09',
+			entries: [asked, entry('2026-11-05', 'auth_requested'), entry('2026-11-09', 'repaired')]
+		});
+		expect(checkDeadline(TIMELY, zz, r, '2026-11-19')).toMatchObject({
+			status: 'met',
+			metOn: '2026-11-09'
+		});
+	});
+
+	it('ignores waits that ended before the clock started', () => {
+		const r = repair({
+			entries: [entry('2026-10-01', 'auth_requested'), entry('2026-10-05', 'auth_approved'), asked]
+		});
+		expect(checkDeadline(TIMELY, zz, r, '2026-11-03')).toMatchObject({
+			status: 'running',
+			due: '2026-11-16'
+		});
+	});
+
+	it('runs a clock directly', () => {
+		const calendar = calendarFor(zz);
+		expect(runClock('2026-11-02', { days: 2, count: 'calendar' }, calendar)).toEqual({
+			due: '2026-11-04',
+			used: 2
+		});
+		expect(
+			runClock('2026-11-02', { days: 5, count: 'calendar' }, calendar, [], '2026-11-04')
+		).toEqual({ used: 2 });
+		expect(
+			pausesFor(
+				TIMELY,
+				repair({ fixedOn: '2026-11-08', entries: [entry('2026-11-05', 'auth_requested')] }),
+				'2026-11-02'
+			)
+		).toEqual([{ from: '2026-11-05', to: '2026-11-08', label: 'waiting for approval' }]);
+	});
+});
+
+describe('start and stop options', () => {
+	const zz = jurisdiction();
+	const base = { ...TIMELY, pauses: [], period: { days: 3, count: 'business' as const } };
+
+	it('"last" starts from the latest of the events that happened', () => {
+		const deadline = {
+			...base,
+			starts: { events: ['visit', 'auth_approved'] as const, when: 'last' as const, label: 'x' }
+		};
+		const d = { ...deadline, starts: { ...deadline.starts, events: [...deadline.starts.events] } };
+		expect(startDate(d, repair({ entries: [entry('2026-11-04', 'visit')] }))).toBe('2026-11-04');
+		expect(
+			startDate(
+				d,
+				repair({ entries: [entry('2026-11-04', 'visit'), entry('2026-11-10', 'auth_approved')] })
+			)
+		).toBe('2026-11-10');
+		expect(startDate(d, repair())).toBeUndefined();
+	});
+
+	it('only counts entries with the right party when met_party is set', () => {
+		const deadline = { ...base, met_by: ['call' as const], met_party: ['supplier' as const] };
+		const insurer = repair({
+			entries: [entry('2026-11-02', 'reported'), entry('2026-11-03', 'call', { party: 'insurer' })]
+		});
+		expect(checkDeadline(deadline, zz, insurer, '2026-11-04').status).toBe('running');
+		const supplier = repair({
+			entries: [entry('2026-11-02', 'reported'), entry('2026-11-03', 'call')]
+		});
+		expect(checkDeadline(deadline, zz, supplier, '2026-11-04').status).toBe('met');
 	});
 });

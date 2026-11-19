@@ -7,7 +7,7 @@
  */
 import { z } from 'zod';
 import { isISODate } from './civil-date.ts';
-import { ENTRY_KINDS, PAYER_KINDS, SEVERITIES } from './model.ts';
+import { ENTRY_KINDS, PARTIES, PAYER_KINDS, SEVERITIES } from './model.ts';
 
 export const SCHEMA_VERSION = 1;
 
@@ -121,10 +121,10 @@ export const Deadline = z
 			.object({
 				events: z.array(z.enum(TIMELINE_EVENTS)).min(1),
 				when: z
-					.enum(['first', 'latest'])
+					.enum(['first', 'last', 'all'])
 					.default('first')
 					.describe(
-						'first: the clock starts at the earliest of these events. latest: it starts once all of them have happened.'
+						'first: the earliest of these events that happened. last: the latest of these events that happened. all: only once every one of them has happened, from the latest.'
 					),
 				label: text.describe('What starts the clock, e.g. "you reported the problem"')
 			})
@@ -135,7 +135,26 @@ export const Deadline = z
 				count: z.enum(['calendar', 'business'])
 			})
 			.strict(),
+		pauses: z
+			.array(
+				z
+					.object({
+						from: z.enum(ENTRY_KINDS),
+						until: z.array(z.enum(ENTRY_KINDS)).min(1),
+						label: text.describe('e.g. "waiting for prior authorization"')
+					})
+					.strict()
+			)
+			.default([])
+			.describe(
+				'Time that does not count: from an event until one of the "until" events (both days included).'
+			),
 		met_by: z.array(z.enum(ENTRY_KINDS)).min(1),
+		met_party: z
+			.array(z.enum(PARTIES))
+			.min(1)
+			.optional()
+			.describe('Only entries with these parties stop the clock'),
 		met_label: text.describe('What stops the clock, e.g. "a technician visit"'),
 		applies_if: Conditions.optional(),
 		recipients: z

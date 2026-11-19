@@ -103,6 +103,9 @@ export const RULE_VARIABLES = {
 	met_date: 'Date it was met',
 	days_late: 'Days late',
 	days_left: 'Days left',
+	days_used: 'Days used so far',
+	paused_since: 'Date the clock paused',
+	paused_for: 'Why the clock is paused',
 	status: 'Status'
 } as const;
 
@@ -211,6 +214,9 @@ function ruleParagraph(
 			met_date: long(check.metOn),
 			days_late: check.daysLate !== undefined ? plural(check.daysLate, 'day') : undefined,
 			days_left: check.daysLeft !== undefined ? plural(check.daysLeft, 'day') : undefined,
+			days_used: check.daysUsed !== undefined ? String(check.daysUsed) : undefined,
+			paused_since: long(check.pausedSince),
+			paused_for: check.pausedFor,
 			status: check.status
 		});
 	}

@@ -167,3 +167,46 @@ holidays:
 		expect(messages).toContain('List at least one office people can complain to');
 	});
 });
+
+describe('the real rules against the sample repair', () => {
+	it('finds the missed Connecticut deadlines and cites them in the letter', async () => {
+		const { rulesFor } = await import('../../src/lib/engine/rules.ts');
+		const { renderLetter, letterToText } = await import('../../src/lib/engine/letters.ts');
+		const { sampleData } = await import('../../src/lib/store/sample.ts');
+		const { content } = loadContent(real);
+		const today = '2026-11-19';
+		const { repairs, profile } = sampleData(today);
+		const repair = repairs[0]!;
+		const rules = rulesFor(repair, content.states.CT, content.federal, today);
+		expect(
+			rules.deadlines.map((check) => [check.deadline.id, check.status, check.due, check.daysLate])
+		).toEqual([
+			// Oct 28 + 10 business days, skipping Veterans Day: Nov 12.
+			['timely-repair', 'missed', '2026-11-12', 7],
+			['order-parts', 'met_late', '2026-11-09', 7]
+		]);
+		expect(rules.protections.map(({ protection }) => protection.id)).toContain(
+			'medicaid-no-prior-auth'
+		);
+		const text = letterToText(
+			renderLetter({
+				letter: content.letters.supplier,
+				repair,
+				profile,
+				rules,
+				stateName: 'Connecticut',
+				today
+			})
+		);
+		expect(text).toContain('(Conn. Gen. Stat. §§ 42-337 and 42-338)');
+		expect(text).toContain(
+			'the ten business days ended on November 12, 2026. The repair is 7 days late.'
+		);
+		expect(text).toContain('(Conn. Gen. Stat. § 17b-278i(b))');
+	});
+
+	it('counts Lincoln Day as a Connecticut holiday', () => {
+		const { content } = loadContent(real);
+		expect(content.states.CT?.holidayRules.map((rule) => rule.id)).toContain('lincoln-day');
+	});
+});

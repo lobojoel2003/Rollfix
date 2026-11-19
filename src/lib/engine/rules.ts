@@ -7,7 +7,6 @@
  * was missed, and by how many days.
  */
 import { addDays, compareDates, diffDays, type ISODate } from './civil-date.ts';
-import { addBusinessDays } from './clock.ts';
 import { HolidayCalendar, type HolidayDef } from './holidays.ts';
 import { sortedEntries, type Repair } from './model.ts';
 import type {
@@ -24,7 +23,14 @@ import type {
 export type Jurisdiction = JurisdictionDef & { holidayRules: HolidayDef[] };
 
 export type DeadlineStatus =
-	'not_started' | 'running' | 'due_today' | 'met' | 'met_late' | 'missed' | 'not_in_effect';
+	| 'not_started'
+	| 'running'
+	| 'paused'
+	| 'due_today'
+	| 'met'
+	| 'met_late'
+	| 'missed'
+	| 'not_in_effect';
 
 export interface DeadlineCheck {
 	deadline: DeadlineDef;
@@ -33,7 +39,7 @@ export interface DeadlineCheck {
 	status: DeadlineStatus;
 	/** The day the clock started (not itself counted). */
 	start?: ISODate;
-	/** The last day to act. */
+	/** The last day to act. Unknown while the clock is paused. */
 	due?: ISODate;
 	/** The day the deadline was met, if it was. */
 	metOn?: ISODate;
@@ -41,6 +47,11 @@ export interface DeadlineCheck {
 	daysLeft?: number;
 	/** Calendar days past the due date: until it was met, or until today. */
 	daysLate?: number;
+	/** Days of the period used so far (counted the way the period is: calendar or business). */
+	daysUsed?: number;
+	/** While paused: since when, and why. */
+	pausedSince?: ISODate;
+	pausedFor?: string;
 }
 
 const calendars = new WeakMap<Jurisdiction, HolidayCalendar>();
@@ -77,20 +88,90 @@ export function startDate(deadline: DeadlineDef, repair: Repair): ISODate | unde
 		event === 'broke' ? repair.brokeOn : entries.find((entry) => entry.kind === event)?.date
 	);
 	const found = dates.filter((date): date is ISODate => date !== undefined).sort();
-	if (deadline.starts.when === 'latest') {
-		return found.length === dates.length ? found.at(-1) : undefined;
+	switch (deadline.starts.when) {
+		case 'all':
+			return found.length === dates.length ? found.at(-1) : undefined;
+		case 'last':
+			return found.at(-1);
+		default:
+			return found[0];
 	}
-	return found[0];
 }
 
+/** A stretch of time that doesn't count toward a deadline. `to` is missing while it lasts. */
+export interface Pause {
+	from: ISODate;
+	to?: ISODate;
+	label: string;
+}
+
+/**
+ * The pauses on a repair's timeline for a deadline: from each "from" event to the next
+ * "until" event on or after it. A pause still open when the repair was fixed ends that day.
+ */
+export function pausesFor(deadline: DeadlineDef, repair: Repair, start: ISODate): Pause[] {
+	const entries = sortedEntries(repair.entries);
+	const pauses: Pause[] = [];
+	for (const rule of deadline.pauses) {
+		for (const begin of entries.filter((entry) => entry.kind === rule.from)) {
+			const end = entries.find(
+				(entry) => rule.until.includes(entry.kind) && compareDates(entry.date, begin.date) >= 0
+			);
+			const to = end?.date ?? repair.fixedOn;
+			if (to && compareDates(to, start) < 0) continue;
+			pauses.push(
+				to ? { from: begin.date, to, label: rule.label } : { from: begin.date, label: rule.label }
+			);
+		}
+	}
+	return pauses;
+}
+
+export interface ClockResult {
+	/** The last day, when the period could be counted to the end. */
+	due?: ISODate;
+	/** Days counted, up to `until` or to the due date. */
+	used: number;
+	/** The pause that stopped the count, if one did. */
+	paused?: Pause;
+}
+
+/**
+ * Count a period from `start` (not itself counted), skipping weekends and holidays for
+ * business days and every day inside a pause. Stops at an open pause, or after `until`.
+ */
+export function runClock(
+	start: ISODate,
+	period: DeadlineDef['period'],
+	calendar: HolidayCalendar,
+	pauses: readonly Pause[] = [],
+	until?: ISODate
+): ClockResult {
+	let cursor = start;
+	let used = 0;
+	for (let guard = 0; used < period.days && guard < 3660; guard++) {
+		cursor = addDays(cursor, 1);
+		if (until && compareDates(cursor, until) > 0) return { used };
+		const open = pauses.find((pause) => !pause.to && compareDates(cursor, pause.from) >= 0);
+		if (open) return { used, paused: open };
+		const inPause = pauses.some(
+			(pause) =>
+				pause.to && compareDates(cursor, pause.from) >= 0 && compareDates(cursor, pause.to) <= 0
+		);
+		if (inPause) continue;
+		if (period.count === 'business' && !calendar.isBusinessDay(cursor)) continue;
+		used++;
+	}
+	return { due: cursor, used };
+}
+
+/** The due date for a deadline started on `start`, with no pauses. */
 export function dueDate(
 	deadline: DeadlineDef,
 	start: ISODate,
 	jurisdiction: Jurisdiction
 ): ISODate {
-	return deadline.period.count === 'business'
-		? addBusinessDays(start, deadline.period.days, calendarFor(jurisdiction))
-		: addDays(start, deadline.period.days);
+	return runClock(start, deadline.period, calendarFor(jurisdiction)).due ?? start;
 }
 
 export function checkDeadline(
@@ -110,29 +191,57 @@ export function checkDeadline(
 	}
 	if (!lawInForce(law, start)) return { ...base, status: 'not_in_effect', start };
 
-	const due = dueDate(deadline, start, jurisdiction);
+	const calendar = calendarFor(jurisdiction);
 	const met = sortedEntries(repair.entries).find(
-		(entry) => deadline.met_by.includes(entry.kind) && compareDates(entry.date, start) >= 0
+		(entry) =>
+			deadline.met_by.includes(entry.kind) &&
+			compareDates(entry.date, start) >= 0 &&
+			(!deadline.met_party || deadline.met_party.includes(entry.party))
 	);
 	const metOn =
 		met?.date ??
 		(deadline.met_by.includes('repaired') && repair.fixedOn ? repair.fixedOn : undefined);
+	// Once the deadline is met, any pause still open ends on that day.
+	const pauses = pausesFor(deadline, repair, start).map((pause) =>
+		metOn && !pause.to && compareDates(pause.from, metOn) <= 0 ? { ...pause, to: metOn } : pause
+	);
+	const clock = runClock(start, deadline.period, calendar, pauses);
 
 	if (metOn) {
-		const late = diffDays(due, metOn);
-		return late > 0
-			? { ...base, status: 'met_late', start, due, metOn, daysLate: late }
-			: { ...base, status: 'met', start, due, metOn };
+		if (!clock.due || compareDates(metOn, clock.due) <= 0) {
+			return { ...base, status: 'met', start, due: clock.due, metOn };
+		}
+		return {
+			...base,
+			status: 'met_late',
+			start,
+			due: clock.due,
+			metOn,
+			daysLate: diffDays(clock.due, metOn)
+		};
 	}
-	// A repair that is closed without the event that stops this clock: we can't tell.
-	if (repair.fixedOn && compareDates(repair.fixedOn, due) <= 0) {
-		return { ...base, status: 'met', start, due, metOn: repair.fixedOn };
+	// A repair closed without the event that stops this clock, by the due date: counted as met.
+	if (repair.fixedOn && clock.due && compareDates(repair.fixedOn, clock.due) <= 0) {
+		return { ...base, status: 'met', start, due: clock.due, metOn: repair.fixedOn };
 	}
-	const left = diffDays(today, due);
-	if (left > 0) return { ...base, status: 'running', start, due, daysLeft: left };
-	if (left === 0) return { ...base, status: 'due_today', start, due, daysLeft: 0 };
+	if (!clock.due) {
+		return {
+			...base,
+			status: 'paused',
+			start,
+			daysUsed: clock.used,
+			pausedSince: clock.paused?.from,
+			pausedFor: clock.paused?.label
+		};
+	}
+	const used = runClock(start, deadline.period, calendar, pauses, today).used;
+	const left = diffDays(today, clock.due);
+	if (left > 0)
+		return { ...base, status: 'running', start, due: clock.due, daysLeft: left, daysUsed: used };
+	if (left === 0)
+		return { ...base, status: 'due_today', start, due: clock.due, daysLeft: 0, daysUsed: used };
 	const end = repair.fixedOn && compareDates(repair.fixedOn, today) < 0 ? repair.fixedOn : today;
-	return { ...base, status: 'missed', start, due, daysLate: diffDays(due, end) };
+	return { ...base, status: 'missed', start, due: clock.due, daysLate: diffDays(clock.due, end) };
 }
 
 export interface RulesForRepair {
@@ -184,13 +293,14 @@ export function deadlinesForLetter(
 	return checks.filter(
 		(check) =>
 			check.deadline.recipients.includes(recipient) &&
-			['running', 'due_today', 'missed', 'met_late'].includes(check.status)
+			['running', 'paused', 'due_today', 'missed', 'met_late'].includes(check.status)
 	);
 }
 
 export const STATUS_LABELS: Record<DeadlineStatus, string> = {
 	not_started: 'Not started',
 	running: 'Clock running',
+	paused: 'Clock paused',
 	due_today: 'Due today',
 	met: 'Met',
 	met_late: 'Met late',
