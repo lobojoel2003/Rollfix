@@ -34,7 +34,7 @@ rm -rf "$STAGE"
 # Software bills of materials
 (cd "$ROOT" && npm sbom --package-lock-only --sbom-format cyclonedx --omit dev > "$DIST/rollfix-web-sbom-v$VERSION.cdx.json")
 REQS="$(mktemp)"
-(cd "$ROOT/api" && uv export --locked --no-dev --no-hashes --no-emit-project --format requirements-txt > "$REQS")
+(cd "$ROOT/api" && uv export --locked --no-dev --no-hashes --no-emit-project --no-header --format requirements-txt -o "$REQS" --quiet)
 uvx --quiet --from cyclonedx-bom cyclonedx-py requirements "$REQS" --of JSON -o "$DIST/rollfix-api-sbom-v$VERSION.cdx.json"
 rm -f "$REQS"
 

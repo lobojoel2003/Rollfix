@@ -236,5 +236,5 @@ jobs:
       - name: Audit API runtime dependencies
         working-directory: api
         run: |
-          uv export --locked --no-dev --no-hashes --no-emit-project --format requirements-txt > requirements.txt
+          uv export --locked --no-dev --no-hashes --no-emit-project --no-header --quiet --format requirements-txt -o requirements.txt
           uvx pip-audit --strict -r requirements.txt

@@ -24,7 +24,7 @@ updates:
             "globals"
           ]
       testing:
-        patterns: ["@playwright/test", "@axe-core/*"]
+        patterns: ["@playwright/test", "playwright-core", "@axe-core/*"]
   - package-ecosystem: uv
     directory: /api
     schedule:
