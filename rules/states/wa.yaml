@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=../../schema/jurisdiction.schema.json
+schema_version: 1
+id: WA
+name: Washington
+last_checked: 2026-11-19
+summary: >-
+  Washington's wheelchair right-to-repair law (since July 27, 2025) requires manufacturers of power
+  and manual wheelchairs, scooters and power-assist devices to make parts, tools, software and
+  manuals available. Washington law sets no repair deadline for suppliers.
+
+laws:
+  - id: sb-5680
+    title: Right to repair wheelchairs
+    bill: SB 5680 (2025), Laws of 2025, chapter 354
+    citation: RCW 19.425
+    status: in_force
+    effective: 2025-07-27
+    url: https://app.leg.wa.gov/RCW/default.aspx?cite=19.425
+    summary: >-
+      Manufacturers of power wheelchairs, manual wheelchairs, mobility scooters and power-assist
+      devices must make documentation, parts, software, firmware and tools available to owners and
+      independent repair providers on fair and reasonable terms. A violation is an unfair or
+      deceptive act under the Consumer Protection Act, enforced by the Attorney General.
+    applies_to: [manufacturer]
+
+protections:
+  - id: right-to-repair
+    law: sb-5680
+    title: Parts, tools and manuals must be available
+    description: >-
+      Manufacturers must make parts, tools, software and documentation available to you or an
+      independent repair shop on fair and reasonable terms.
+    recipients: [supplier, agency]
+    letter: >-
+      Washington law requires wheelchair manufacturers to make documentation, parts, software,
+      firmware and tools available to owners and independent repair providers on fair and
+      reasonable terms; a violation is an unfair or deceptive act under the Consumer Protection Act
+      ({{law_citation}}). If parts are holding up this repair, please tell me which parts are needed
+      and from which manufacturer.
+
+agencies:
+  - id: attorney-general
+    name: Washington State Office of the Attorney General
+    handles: >-
+      Consumer complaints. The Attorney General alone enforces the wheelchair right-to-repair law.
+    url: https://www.atg.wa.gov/file-complaint
+    address: |
+      PO Box 40100
+      Olympia, WA 98504
+
+sources:
+  - label: RCW 19.425
+    url: https://app.leg.wa.gov/RCW/default.aspx?cite=19.425
+  - label: SB 5680, session law
+    url: https://lawfilesext.leg.wa.gov/biennium/2025-26/Pdf/Bills/Session%20Laws/Senate/5680.SL.pdf

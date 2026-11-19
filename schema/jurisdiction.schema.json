@@ -1,0 +1,735 @@
+{
+	"$id": "https://lobojoel2003.github.io/Rollfix/schema/jurisdiction.schema.json",
+	"title": "Rollfix state or federal rules",
+	"description": "Schema for rules/states/*.yaml and rules/federal.yaml. Generated from src/lib/engine/schema.ts; do not edit by hand.",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"type": "object",
+	"properties": {
+		"schema_version": {
+			"type": "number",
+			"const": 1
+		},
+		"id": {
+			"type": "string",
+			"pattern": "^(?:[A-Z]{2}|US)$"
+		},
+		"name": {
+			"type": "string",
+			"minLength": 1
+		},
+		"last_checked": {
+			"type": "string",
+			"description": "The day someone last checked these rules against the source"
+		},
+		"summary": {
+			"type": "string",
+			"minLength": 1
+		},
+		"laws": {
+			"default": [],
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+					},
+					"title": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Official or common name of the law"
+					},
+					"bill": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Bill and session law number, e.g. \"HB22-1031 (2022)\""
+					},
+					"citation": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Where it is codified, e.g. \"C.R.S. § 6-1-1503\""
+					},
+					"status": {
+						"type": "string",
+						"enum": [
+							"in_force",
+							"enacted",
+							"pending",
+							"failed"
+						]
+					},
+					"effective": {
+						"description": "When it took (or takes) effect",
+						"type": "string"
+					},
+					"url": {
+						"type": "string",
+						"format": "uri",
+						"description": "Primary source: the statute or enrolled bill"
+					},
+					"summary": {
+						"type": "string",
+						"minLength": 1
+					},
+					"applies_to": {
+						"minItems": 1,
+						"type": "array",
+						"items": {
+							"type": "string",
+							"enum": [
+								"supplier",
+								"manufacturer",
+								"insurer",
+								"medicaid",
+								"medicare"
+							]
+						}
+					}
+				},
+				"required": [
+					"id",
+					"title",
+					"bill",
+					"citation",
+					"status",
+					"url",
+					"summary",
+					"applies_to"
+				],
+				"additionalProperties": false
+			}
+		},
+		"deadlines": {
+			"default": [],
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+					},
+					"law": {
+						"type": "string",
+						"pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$",
+						"description": "The id of the law in this file that sets the deadline"
+					},
+					"title": {
+						"type": "string",
+						"minLength": 1
+					},
+					"who": {
+						"type": "string",
+						"enum": [
+							"supplier",
+							"manufacturer",
+							"insurer",
+							"medicaid",
+							"medicare"
+						]
+					},
+					"description": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Plain-language explanation shown in the app"
+					},
+					"quote": {
+						"description": "The exact words of the law",
+						"type": "string",
+						"minLength": 1
+					},
+					"starts": {
+						"type": "object",
+						"properties": {
+							"events": {
+								"minItems": 1,
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": [
+										"broke",
+										"reported",
+										"call",
+										"message",
+										"visit",
+										"no_show",
+										"auth_requested",
+										"auth_approved",
+										"auth_denied",
+										"parts_ordered",
+										"parts_arrived",
+										"loaner",
+										"letter",
+										"impact",
+										"repaired",
+										"note"
+									]
+								}
+							},
+							"when": {
+								"default": "first",
+								"description": "first: the earliest of these events that happened. last: the latest of these events that happened. all: only once every one of them has happened, from the latest.",
+								"type": "string",
+								"enum": [
+									"first",
+									"last",
+									"all"
+								]
+							},
+							"label": {
+								"type": "string",
+								"minLength": 1,
+								"description": "What starts the clock, e.g. \"you reported the problem\""
+							}
+						},
+						"required": [
+							"events",
+							"label"
+						],
+						"additionalProperties": false
+					},
+					"period": {
+						"type": "object",
+						"properties": {
+							"days": {
+								"type": "integer",
+								"exclusiveMinimum": 0,
+								"maximum": 9007199254740991
+							},
+							"count": {
+								"type": "string",
+								"enum": [
+									"calendar",
+									"business"
+								]
+							}
+						},
+						"required": [
+							"days",
+							"count"
+						],
+						"additionalProperties": false
+					},
+					"pauses": {
+						"default": [],
+						"description": "Time that does not count: from an event until one of the \"until\" events (both days included).",
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"from": {
+									"type": "string",
+									"enum": [
+										"reported",
+										"call",
+										"message",
+										"visit",
+										"no_show",
+										"auth_requested",
+										"auth_approved",
+										"auth_denied",
+										"parts_ordered",
+										"parts_arrived",
+										"loaner",
+										"letter",
+										"impact",
+										"repaired",
+										"note"
+									]
+								},
+								"until": {
+									"minItems": 1,
+									"type": "array",
+									"items": {
+										"type": "string",
+										"enum": [
+											"reported",
+											"call",
+											"message",
+											"visit",
+											"no_show",
+											"auth_requested",
+											"auth_approved",
+											"auth_denied",
+											"parts_ordered",
+											"parts_arrived",
+											"loaner",
+											"letter",
+											"impact",
+											"repaired",
+											"note"
+										]
+									}
+								},
+								"label": {
+									"type": "string",
+									"minLength": 1,
+									"description": "e.g. \"waiting for prior authorization\""
+								}
+							},
+							"required": [
+								"from",
+								"until",
+								"label"
+							],
+							"additionalProperties": false
+						}
+					},
+					"met_by": {
+						"minItems": 1,
+						"type": "array",
+						"items": {
+							"type": "string",
+							"enum": [
+								"reported",
+								"call",
+								"message",
+								"visit",
+								"no_show",
+								"auth_requested",
+								"auth_approved",
+								"auth_denied",
+								"parts_ordered",
+								"parts_arrived",
+								"loaner",
+								"letter",
+								"impact",
+								"repaired",
+								"note"
+							]
+						}
+					},
+					"met_party": {
+						"description": "Only entries with these parties stop the clock",
+						"minItems": 1,
+						"type": "array",
+						"items": {
+							"type": "string",
+							"enum": [
+								"supplier",
+								"insurer",
+								"manufacturer",
+								"clinician",
+								"agency",
+								"me",
+								"other"
+							]
+						}
+					},
+					"met_label": {
+						"type": "string",
+						"minLength": 1,
+						"description": "What stops the clock, e.g. \"a technician visit\""
+					},
+					"applies_if": {
+						"type": "object",
+						"properties": {
+							"payers": {
+								"minItems": 1,
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": [
+										"medicare",
+										"medicaid",
+										"dual",
+										"medicare_advantage",
+										"medicaid_managed_care",
+										"private",
+										"va",
+										"workers_comp",
+										"self_pay",
+										"other"
+									]
+								}
+							},
+							"severities": {
+								"minItems": 1,
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": [
+										"stranded",
+										"unsafe",
+										"limited"
+									]
+								}
+							}
+						},
+						"additionalProperties": false
+					},
+					"recipients": {
+						"default": [
+							"supplier",
+							"insurer",
+							"agency"
+						],
+						"minItems": 1,
+						"type": "array",
+						"items": {
+							"type": "string",
+							"enum": [
+								"supplier",
+								"insurer",
+								"agency"
+							]
+						}
+					},
+					"letter": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Paragraph added to letters while this deadline matters"
+					}
+				},
+				"required": [
+					"id",
+					"law",
+					"title",
+					"who",
+					"description",
+					"starts",
+					"period",
+					"met_by",
+					"met_label",
+					"letter"
+				],
+				"additionalProperties": false
+			}
+		},
+		"protections": {
+			"default": [],
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+					},
+					"law": {
+						"type": "string",
+						"pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+					},
+					"title": {
+						"type": "string",
+						"minLength": 1
+					},
+					"description": {
+						"type": "string",
+						"minLength": 1
+					},
+					"applies_if": {
+						"type": "object",
+						"properties": {
+							"payers": {
+								"minItems": 1,
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": [
+										"medicare",
+										"medicaid",
+										"dual",
+										"medicare_advantage",
+										"medicaid_managed_care",
+										"private",
+										"va",
+										"workers_comp",
+										"self_pay",
+										"other"
+									]
+								}
+							},
+							"severities": {
+								"minItems": 1,
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": [
+										"stranded",
+										"unsafe",
+										"limited"
+									]
+								}
+							}
+						},
+						"additionalProperties": false
+					},
+					"recipients": {
+						"default": [
+							"supplier",
+							"insurer",
+							"agency"
+						],
+						"type": "array",
+						"items": {
+							"type": "string",
+							"enum": [
+								"supplier",
+								"insurer",
+								"agency"
+							]
+						}
+					},
+					"letter": {
+						"description": "Paragraph added to letters to these recipients",
+						"type": "string",
+						"minLength": 1
+					}
+				},
+				"required": [
+					"id",
+					"law",
+					"title",
+					"description"
+				],
+				"additionalProperties": false
+			}
+		},
+		"agencies": {
+			"default": [],
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+					},
+					"name": {
+						"type": "string",
+						"minLength": 1
+					},
+					"handles": {
+						"type": "string",
+						"minLength": 1,
+						"description": "What this office handles, in plain language"
+					},
+					"url": {
+						"type": "string",
+						"format": "uri",
+						"description": "Official complaint page"
+					},
+					"phone": {
+						"type": "string",
+						"minLength": 1
+					},
+					"address": {
+						"description": "Mailing address, one line per line",
+						"type": "string",
+						"minLength": 1
+					},
+					"applies_if": {
+						"type": "object",
+						"properties": {
+							"payers": {
+								"minItems": 1,
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": [
+										"medicare",
+										"medicaid",
+										"dual",
+										"medicare_advantage",
+										"medicaid_managed_care",
+										"private",
+										"va",
+										"workers_comp",
+										"self_pay",
+										"other"
+									]
+								}
+							},
+							"severities": {
+								"minItems": 1,
+								"type": "array",
+								"items": {
+									"type": "string",
+									"enum": [
+										"stranded",
+										"unsafe",
+										"limited"
+									]
+								}
+							}
+						},
+						"additionalProperties": false
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"handles",
+					"url"
+				],
+				"additionalProperties": false
+			}
+		},
+		"holidays": {
+			"default": {
+				"extends": [
+					"us-federal"
+				],
+				"add": [],
+				"remove": []
+			},
+			"type": "object",
+			"properties": {
+				"extends": {
+					"default": [
+						"us-federal"
+					],
+					"type": "array",
+					"items": {
+						"type": "string",
+						"pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+					}
+				},
+				"add": {
+					"default": [],
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "string",
+								"pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+							},
+							"name": {
+								"type": "string",
+								"minLength": 1
+							},
+							"date": {
+								"anyOf": [
+									{
+										"type": "object",
+										"properties": {
+											"month": {
+												"type": "integer",
+												"minimum": 1,
+												"maximum": 12
+											},
+											"day": {
+												"type": "integer",
+												"minimum": 1,
+												"maximum": 31
+											},
+											"observed": {
+												"type": "string",
+												"enum": [
+													"none",
+													"nearest_weekday",
+													"sunday_to_monday"
+												]
+											}
+										},
+										"required": [
+											"month",
+											"day"
+										],
+										"additionalProperties": false
+									},
+									{
+										"type": "object",
+										"properties": {
+											"month": {
+												"type": "integer",
+												"minimum": 1,
+												"maximum": 12
+											},
+											"weekday": {
+												"type": "string",
+												"enum": [
+													"sun",
+													"mon",
+													"tue",
+													"wed",
+													"thu",
+													"fri",
+													"sat"
+												]
+											},
+											"nth": {
+												"type": "integer",
+												"minimum": -1,
+												"maximum": 5
+											},
+											"offset_days": {
+												"type": "integer",
+												"minimum": -9007199254740991,
+												"maximum": 9007199254740991
+											}
+										},
+										"required": [
+											"month",
+											"weekday",
+											"nth"
+										],
+										"additionalProperties": false
+									}
+								]
+							},
+							"since": {
+								"type": "integer",
+								"minimum": 1900,
+								"maximum": 9007199254740991
+							},
+							"until": {
+								"type": "integer",
+								"minimum": 1900,
+								"maximum": 9007199254740991
+							}
+						},
+						"required": [
+							"id",
+							"name",
+							"date"
+						],
+						"additionalProperties": false
+					}
+				},
+				"remove": {
+					"default": [],
+					"type": "array",
+					"items": {
+						"type": "string",
+						"pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+					}
+				}
+			},
+			"additionalProperties": false
+		},
+		"sources": {
+			"default": [],
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"label": {
+						"type": "string",
+						"minLength": 1
+					},
+					"url": {
+						"type": "string",
+						"format": "uri"
+					}
+				},
+				"required": [
+					"label",
+					"url"
+				],
+				"additionalProperties": false
+			}
+		}
+	},
+	"required": [
+		"schema_version",
+		"id",
+		"name",
+		"last_checked",
+		"summary"
+	],
+	"additionalProperties": false
+}

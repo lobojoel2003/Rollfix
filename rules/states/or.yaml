@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=../../schema/jurisdiction.schema.json
+schema_version: 1
+id: OR
+name: Oregon
+last_checked: 2026-11-19
+summary: >-
+  Since January 1, 2026, the Oregon Health Authority and coordinated care organizations must decide
+  a prior authorization request to repair complex rehabilitation technology within 72 hours, and
+  Oregon's right-to-repair law covers electric wheelchairs.
+
+laws:
+  - id: sb-549
+    title: Fast decisions on complex rehab repair approvals
+    bill: SB 549 (2025), Oregon Laws 2025, chapter 258
+    citation: Or. Laws 2025, ch. 258, § 2 (ORS chapter 414)
+    status: in_force
+    effective: 2026-01-01
+    url: https://www.oregonlegislature.gov/bills_laws/lawsstatutes/2025orLaw0258.pdf
+    summary: >-
+      The Oregon Health Authority or a coordinated care organization (CCO) must decide a request for
+      prior authorization to repair complex rehabilitation technology, including manual and power
+      wheelchair systems, within 72 hours after receiving it. It applies to CCO contracts entered,
+      amended or renewed from January 1, 2026.
+    applies_to: [medicaid]
+
+  - id: sb-550
+    title: Right to repair for electric wheelchairs
+    bill: SB 550 (2025), Oregon Laws 2025, chapter 290
+    citation: Or. Laws 2024, ch. 69, as amended by Or. Laws 2025, ch. 290
+    status: in_force
+    effective: 2026-01-01
+    url: https://www.oregonlegislature.gov/bills_laws/lawsstatutes/2025orLaw0290.pdf
+    summary: >-
+      Extends Oregon's right-to-repair law to electric wheelchairs and complex rehabilitation
+      technology. Manufacturers must make documentation, tools and parts available to owners and
+      independent repair providers on fair and reasonable terms. The Attorney General enforces it.
+    applies_to: [manufacturer]
+
+deadlines:
+  - id: prior-auth-72-hours
+    law: sb-549
+    title: Decide on prior authorization within 72 hours
+    who: medicaid
+    description: >-
+      If the Oregon Health Plan or your CCO pays, it must decide a prior authorization request to
+      repair your chair within 72 hours of receiving it. Rollfix counts this as three days from the
+      day you log that the request was sent.
+    quote: >-
+      The Oregon Health Authority or a coordinated care organization shall make a determination on
+      a request for prior authorization for medical assistance coverage for the cost to repair
+      complex rehabilitation technology within 72 hours after receiving the request.
+    starts:
+      events: [auth_requested]
+      label: the request for approval was sent
+    period: { days: 3, count: calendar }
+    met_by: [auth_approved, auth_denied]
+    met_label: a decision
+    applies_if: { payers: [medicaid, medicaid_managed_care] }
+    recipients: [insurer, supplier, agency]
+    letter: >-
+      Oregon law requires the Oregon Health Authority or a coordinated care organization to decide a
+      prior authorization request to repair complex rehabilitation technology within 72 hours after
+      receiving it ({{law_citation}}). The request was sent on {{start_date}}.{{#if status ==
+      "missed"}} I have no record of a decision, which was due by {{due_date}}.{{/if}}{{#if status
+      == "met_late"}} The decision did not come until {{met_date}}.{{/if}}{{#if status ==
+      "running"}} A decision is due by {{due_date}}.{{/if}}
+
+protections:
+  - id: right-to-repair
+    law: sb-550
+    title: Parts, tools and manuals must be available
+    description: >-
+      Manufacturers must make parts, tools and documentation for electric wheelchairs available to
+      you or an independent repair shop on fair and reasonable terms.
+    recipients: [supplier, agency]
+    letter: >-
+      Oregon's right-to-repair law covers electric wheelchairs: manufacturers must make
+      documentation, tools and parts available to owners and independent repair providers on fair
+      and reasonable terms ({{law_citation}}). If parts are holding up this repair, please tell me
+      which parts are needed and from which manufacturer.
+
+agencies:
+  - id: doj-consumer-protection
+    name: Oregon Department of Justice, Consumer Protection
+    handles: Consumer complaints, including right-to-repair complaints about manufacturers.
+    url: https://justice.oregon.gov/consumercomplaints/
+
+sources:
+  - label: Oregon Laws 2025, chapter 258 (SB 549)
+    url: https://www.oregonlegislature.gov/bills_laws/lawsstatutes/2025orLaw0258.pdf
+  - label: Oregon Laws 2025, chapter 290 (SB 550)
+    url: https://www.oregonlegislature.gov/bills_laws/lawsstatutes/2025orLaw0290.pdf

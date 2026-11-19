@@ -1,0 +1,78 @@
+# yaml-language-server: $schema=../../schema/jurisdiction.schema.json
+schema_version: 1
+id: RI
+name: Rhode Island
+last_checked: 2026-11-19
+summary: >-
+  Rhode Island health plans, including Medicaid, can't require prior authorization or medical
+  paperwork for repairs of a consumer-owned complex wheelchair (plans issued or renewed from
+  January 1, 2026). Suppliers must service the complex wheelchairs they sell, and manufacturers must
+  make parts and tools available.
+
+laws:
+  - id: ch-6-61
+    title: Consumer access to powered wheelchair repairs
+    bill: S 884 and H 5017 Sub A (2025), P.L. 2025, chapters 295 and 297
+    citation: R.I. Gen. Laws chapter 6-61
+    status: in_force
+    effective: 2025-06-26
+    url: https://webserver.rilegislature.gov/PublicLaws/law25/law25295.htm
+    summary: >-
+      Health plans, public-employee plans and Medicaid (including managed care) can't require prior
+      authorization or medical documentation for repairs of consumer-owned complex wheelchairs, for
+      plans issued or renewed on or after January 1, 2026. Suppliers that sell complex wheelchairs
+      must offer service and repairs for the chair's useful life. Manufacturers must make parts,
+      tools and documentation available on fair and reasonable terms.
+    applies_to: [insurer, medicaid, supplier, manufacturer]
+
+protections:
+  - id: no-prior-auth
+    law: ch-6-61
+    title: No prior authorization or paperwork for complex wheelchair repairs
+    description: >-
+      Your plan can't require the supplier to get prior authorization, or medical documentation, to
+      repair a complex wheelchair you own (for plans issued or renewed from January 1, 2026).
+    applies_if: { payers: [private, medicaid, medicaid_managed_care, dual, other] }
+    letter: >-
+      Rhode Island law provides that a health plan's coverage of complex wheelchair repairs "shall
+      not require" a supplier "to obtain any form of prior authorization" or "any medical
+      documentation to complete repairs for consumer-owned complex rehabilitation technology"
+      ({{law_citation}}, for plans issued or renewed on or after January 1, 2026).
+
+  - id: service-what-they-sell
+    law: ch-6-61
+    title: Suppliers must service what they sell
+    description: >-
+      A supplier that sold you a complex power or manual wheelchair must offer service and repairs
+      for the chair's useful life, unless you moved out of its service area or the damage came from
+      abuse or misuse.
+    recipients: [supplier, agency]
+    letter: >-
+      Rhode Island law requires a supplier that sold a complex wheelchair to offer service and
+      repairs during the wheelchair's useful life ({{law_citation}}).
+
+  - id: right-to-repair
+    law: ch-6-61
+    title: Parts, tools and manuals must be available
+    description: >-
+      Power wheelchair manufacturers must make parts, tools and documentation available to you or an
+      independent repair shop on fair and reasonable terms; a part that is out of stock must be made
+      available within five business days of when it becomes available.
+    recipients: [supplier]
+    letter: >-
+      Manufacturers must also make power wheelchair parts, tools and documentation available on fair
+      and reasonable terms, and make an out-of-stock part available within five business days of
+      when it becomes available ({{law_citation}}). If parts are holding up this repair, please tell
+      me which parts are needed and from which manufacturer.
+
+agencies:
+  - id: attorney-general
+    name: Rhode Island Attorney General's Consumer Protection Unit
+    handles: Consumer complaints, including deceptive trade practices.
+    url: https://riag.ri.gov/forms/consumer-complaint
+
+sources:
+  - label: P.L. 2025, chapter 295 (S 884)
+    url: https://webserver.rilegislature.gov/PublicLaws/law25/law25295.htm
+  - label: P.L. 2025, chapter 297 (H 5017 Sub A)
+    url: https://webserver.rilegislature.gov/PublicLaws/law25/law25297.htm

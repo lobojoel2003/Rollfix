@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=../../schema/jurisdiction.schema.json
+schema_version: 1
+id: MD
+name: Maryland
+last_checked: 2026-11-19
+summary: >-
+  Since October 1, 2025, powered wheelchair manufacturers must make the parts, tools and manuals for
+  common repairs (batteries, chargers, joysticks, wheels and more) available to owners and
+  independent repairers. Maryland law sets no repair deadline for suppliers.
+
+laws:
+  - id: hb-31
+    title: Right to repair powered wheelchairs
+    bill: HB 31 (2025), Chapter 546
+    citation: Md. Code, Com. Law §§ 14-5001 to 14-5004
+    status: in_force
+    effective: 2025-10-01
+    url: https://mgaleg.maryland.gov/2025RS/Chapters_noln/CH_546_hb0031t.pdf
+    summary: >-
+      Powered wheelchair manufacturers must make documentation, parts, software, firmware and tools
+      available to owners and independent repair providers on fair and reasonable terms for a list
+      of common parts, including batteries and chargers, nonprogrammable joysticks, joystick
+      housings and brackets, and wheel assemblies. A violation is an unfair, abusive or deceptive
+      trade practice.
+    applies_to: [manufacturer]
+
+protections:
+  - id: right-to-repair
+    law: hb-31
+    title: Parts for common repairs must be available
+    description: >-
+      For batteries, chargers, joysticks, wheels and other listed parts, manufacturers must make the
+      parts, tools and documentation available to you or an independent repair shop on fair and
+      reasonable terms.
+    recipients: [supplier, agency]
+    letter: >-
+      Maryland law requires powered wheelchair manufacturers to make documentation, parts and tools
+      for common repairs, including batteries, chargers, joysticks and wheel assemblies, available
+      to owners and independent repair providers on fair and reasonable terms ({{law_citation}}).
+      If parts are holding up this repair, please tell me which parts are needed and from which
+      manufacturer.
+
+agencies:
+  - id: consumer-protection
+    name: Maryland Attorney General's Consumer Protection Division
+    handles: Consumer complaints, including unfair or deceptive trade practices.
+    url: https://oag.maryland.gov/i-need-to/Pages/business-complaints.aspx
+    phone: 410-528-8662
+    address: |
+      200 St. Paul Place, 16th Floor
+      Baltimore, MD 21202
+
+sources:
+  - label: HB 31 (2025), Chapter 546
+    url: https://mgaleg.maryland.gov/2025RS/Chapters_noln/CH_546_hb0031t.pdf

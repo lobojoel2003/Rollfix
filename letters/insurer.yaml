@@ -1,0 +1,101 @@
+# yaml-language-server: $schema=../schema/letter.schema.json
+# The letter to the insurer (Medicare, Medicaid, a Medicare Advantage or private plan).
+schema_version: 1
+id: insurer
+recipient: insurer
+title: Letter to your insurance
+description: >-
+  Ask your insurer or Medicaid plan to decide the repair quickly, tell you what is missing,
+  and cover a loaner chair. Includes the dated timeline.
+response_days: 10
+options:
+  - id: ask_expedited
+    label: Ask for a fast (expedited) decision
+    default: true
+  - id: ask_loaner
+    label: Ask them to cover a loaner or rental chair
+    default: true
+  - id: ask_written_decision
+    label: Ask for any decision in writing, with appeal rights
+    default: true
+  - id: ask_policy
+    label: Ask for a copy of the plan's wheelchair repair rules
+    default: false
+subject: >-
+  {{#if is_fixed}}Delay in approving my power wheelchair repair{{else}}Request to approve and
+  expedite my power wheelchair repair (day {{day_number}}){{/if}}
+body: |
+  Dear {{payer_name}},
+
+  I am writing about the repair of my {{chair}}{{#if chair_serial}} (serial number
+  {{chair_serial}}){{/if}}{{#if member_id}}. My member ID is {{member_id}}{{/if}}. The chair
+  stopped working on {{broke_date}}{{#if problem}} because of a problem with {{problem}}{{/if}}.
+
+  {{#if is_fixed}}
+  It was repaired on {{fixed_date}}, after {{days_without}} without it.
+  {{else}}
+  {{#if is_stranded}}I cannot use it at all.{{/if}}{{#if is_unsafe}}It still runs, but it is not
+  safe to use.{{/if}}{{#if is_limited}}It works only partly.{{/if}} Today is day {{day_number}}
+  without a working chair. My power wheelchair is medically necessary: it is how I move, sit
+  safely and take part in daily life.
+  {{/if}}
+
+  The repair is being handled by {{supplier_name}}{{#if auth_requested_date}}, which sent the
+  request for approval to you on {{auth_requested_date}}{{/if}}.{{#if auth_pending}} As far as I
+  know, no decision has been made.{{/if}}
+
+  {{#if auth_denied}}
+  I understand the request was denied or sent back. Please send me the written decision, the
+  exact reason, what would make it approvable, and how to appeal.
+  {{/if}}
+
+  {{#if impact}}
+  {{impact}}
+  {{/if}}
+
+  {{#if impact_list}}
+  The delay has already affected me in these ways:
+
+  {{impact_list}}
+  {{/if}}
+
+  {{#if has_state_rules}}
+  {{state_rules}}
+  {{/if}}
+
+  {{#unless is_fixed}}
+  I am asking you to:
+
+  {{#if ask_expedited}}
+  - Decide the repair request as quickly as possible, using an expedited or urgent review. Waiting
+  longer could seriously harm my health and independence.
+  {{/if}}
+
+  - Tell me in writing what, if anything, you still need, and from whom.
+
+  {{#if ask_loaner}}
+  - Cover a loaner or rental chair until my own chair is repaired.
+  {{/if}}
+
+  {{#if ask_written_decision}}
+  - Send me any decision in writing, including my appeal rights.
+  {{/if}}
+
+  {{#if ask_policy}}
+  - Send me a copy of the plan's rules for wheelchair repairs and prior authorization.
+  {{/if}}
+  {{/unless}}
+
+  {{#if is_fixed}}
+  {{#if ask_policy}}
+  Please send me a copy of the plan's rules for wheelchair repairs and prior authorization, so
+  that the next repair does not take this long.
+  {{/if}}
+  {{/if}}
+
+  A dated timeline of every call, visit and message about this repair is enclosed. Please reply
+  in writing by {{response_date}}.
+
+  Thank you. You can reach me{{#if has_phone}} at {{my_phone}}{{/if}}{{#if has_email}}{{#if
+  has_phone}} or{{/if}} at {{my_email}}{{/if}}{{#unless has_phone}}{{#unless has_email}} at the
+  address above{{/unless}}{{/unless}}.

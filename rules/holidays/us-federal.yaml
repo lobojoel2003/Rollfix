@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=../../schema/holidays.schema.json
+# U.S. federal holidays, used to count business days.
+# When a fixed-date holiday falls on a Saturday it is observed on Friday;
+# on a Sunday, it is observed on Monday.
+schema_version: 1
+id: us-federal
+name: U.S. federal holidays
+holidays:
+  - id: new-years-day
+    name: New Year's Day
+    date: { month: 1, day: 1 }
+  - id: mlk-day
+    name: Martin Luther King Jr. Day
+    date: { month: 1, weekday: mon, nth: 3 }
+  - id: presidents-day
+    name: Presidents' Day (Washington's Birthday)
+    date: { month: 2, weekday: mon, nth: 3 }
+  - id: memorial-day
+    name: Memorial Day
+    date: { month: 5, weekday: mon, nth: -1 }
+  - id: juneteenth
+    name: Juneteenth
+    date: { month: 6, day: 19 }
+    since: 2021
+  - id: independence-day
+    name: Independence Day
+    date: { month: 7, day: 4 }
+  - id: labor-day
+    name: Labor Day
+    date: { month: 9, weekday: mon, nth: 1 }
+  - id: columbus-day
+    name: Columbus Day / Indigenous Peoples' Day
+    date: { month: 10, weekday: mon, nth: 2 }
+  - id: veterans-day
+    name: Veterans Day
+    date: { month: 11, day: 11 }
+  - id: thanksgiving
+    name: Thanksgiving Day
+    date: { month: 11, weekday: thu, nth: 4 }
+  - id: christmas
+    name: Christmas Day
+    date: { month: 12, day: 25 }
+sources:
+  - label: 5 U.S.C. § 6103
+    url: https://www.law.cornell.edu/uscode/text/5/6103
+  - label: U.S. Office of Personnel Management, Federal Holidays
+    url: https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/

@@ -1,0 +1,92 @@
+{
+	"$id": "https://lobojoel2003.github.io/Rollfix/schema/letter.schema.json",
+	"title": "Rollfix letter",
+	"description": "Schema for letters/*.yaml. Generated from src/lib/engine/schema.ts; do not edit by hand.",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"type": "object",
+	"properties": {
+		"schema_version": {
+			"type": "number",
+			"const": 1
+		},
+		"id": {
+			"type": "string",
+			"pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+		},
+		"recipient": {
+			"type": "string",
+			"enum": [
+				"supplier",
+				"insurer",
+				"agency"
+			]
+		},
+		"title": {
+			"type": "string",
+			"minLength": 1
+		},
+		"description": {
+			"type": "string",
+			"minLength": 1
+		},
+		"subject": {
+			"type": "string",
+			"minLength": 1
+		},
+		"body": {
+			"type": "string",
+			"minLength": 1
+		},
+		"closing": {
+			"default": "Sincerely,",
+			"type": "string",
+			"minLength": 1
+		},
+		"response_days": {
+			"default": 10,
+			"type": "integer",
+			"minimum": 1,
+			"maximum": 60
+		},
+		"options": {
+			"default": [],
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+					},
+					"label": {
+						"type": "string",
+						"minLength": 1
+					},
+					"help": {
+						"type": "string",
+						"minLength": 1
+					},
+					"default": {
+						"default": false,
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"id",
+					"label"
+				],
+				"additionalProperties": false
+			}
+		}
+	},
+	"required": [
+		"schema_version",
+		"id",
+		"recipient",
+		"title",
+		"description",
+		"subject",
+		"body"
+	],
+	"additionalProperties": false
+}

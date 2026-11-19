@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=../../schema/jurisdiction.schema.json
+schema_version: 1
+id: CO
+name: Colorado
+last_checked: 2026-11-19
+summary: >-
+  Colorado passed the first right-to-repair law for powered wheelchairs: manufacturers must make
+  parts, tools, software and manuals available to owners and independent repairers. Health First
+  Colorado (Medicaid) may not require prior authorization for any repair of complex rehabilitation
+  technology. Colorado law sets no repair deadline for suppliers.
+
+laws:
+  - id: hb22-1031
+    title: Consumer Right to Repair Powered Wheelchairs
+    bill: HB22-1031 (2022)
+    citation: C.R.S. § 6-1-1503
+    status: in_force
+    effective: 2023-01-01
+    url: https://content.leg.colorado.gov/sites/default/files/documents/2022A/bills/2022a_1031_enr.pdf
+    summary: >-
+      Powered wheelchair manufacturers must make documentation, parts, embedded software, firmware
+      and tools available to owners and independent repair providers on fair and reasonable terms,
+      including what is needed to reset a security lock. A violation is a deceptive trade practice
+      under the Colorado Consumer Protection Act (C.R.S. § 6-1-105). Exceptions include parts the
+      manufacturer can no longer get.
+    applies_to: [manufacturer]
+
+  - id: hb22-1290
+    title: No prior authorization for complex rehab repairs
+    bill: HB22-1290 (2022)
+    citation: C.R.S. § 25.5-5-323(4)
+    status: in_force
+    url: https://content.leg.colorado.gov/sites/default/files/documents/2022A/bills/2022a_1290_enr.pdf
+    summary: >-
+      Health First Colorado (Medicaid) "shall not require prior authorization for any repair of
+      complex rehabilitation technology." The law also set up repair-time reporting by suppliers.
+    applies_to: [medicaid]
+
+protections:
+  - id: right-to-repair
+    law: hb22-1031
+    title: Parts, tools and manuals must be available
+    description: >-
+      Manufacturers must sell parts and provide tools, software and documentation to you or an
+      independent repair shop on fair and reasonable terms, so a repair doesn't have to wait for one
+      company.
+    recipients: [supplier, agency]
+    letter: >-
+      Colorado law requires powered wheelchair manufacturers to make documentation, parts, embedded
+      software, firmware and tools available to owners and independent repair providers on fair and
+      reasonable terms ({{law_citation}}). If parts are holding up this repair, please tell me which
+      parts are needed and from which manufacturer.
+
+  - id: medicaid-no-prior-auth
+    law: hb22-1290
+    title: Medicaid can't require prior authorization for any repair
+    description: >-
+      If Health First Colorado pays, it can't require prior authorization for any repair of complex
+      rehabilitation technology, including complex rehab power wheelchairs.
+    applies_if: { payers: [medicaid, medicaid_managed_care, dual] }
+    letter: >-
+      Colorado law provides that Health First Colorado "shall not require prior authorization for
+      any repair of complex rehabilitation technology" ({{law_citation}}). Waiting for prior
+      authorization should not be holding up this repair.
+
+agencies:
+  - id: attorney-general
+    name: Colorado Attorney General's Office
+    handles: >-
+      Consumer complaints, including manufacturers that don't make wheelchair parts and tools
+      available as the law requires.
+    url: https://coag.gov/file-complaint/
+    address: |
+      1300 Broadway, 10th Floor
+      Denver, CO 80203
+
+sources:
+  - label: HB22-1031, enrolled bill
+    url: https://content.leg.colorado.gov/sites/default/files/documents/2022A/bills/2022a_1031_enr.pdf
+  - label: HB22-1290, enrolled bill
+    url: https://content.leg.colorado.gov/sites/default/files/documents/2022A/bills/2022a_1290_enr.pdf

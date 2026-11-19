@@ -1,0 +1,232 @@
+# yaml-language-server: $schema=../../schema/jurisdiction.schema.json
+schema_version: 1
+id: CT
+name: Connecticut
+last_checked: 2026-11-19
+summary: >-
+  Connecticut wheelchair dealers must repair a wheelchair within ten business days of your request,
+  not counting time spent waiting for insurance approval or parts. They must answer repair requests
+  within one business day and order parts within three. Medicaid, and many private plans, can't
+  require prior authorization for medically necessary repairs.
+
+laws:
+  - id: pa-24-58
+    title: Wheelchair repair requirements (Public Act 24-58)
+    bill: SB 308 (2024), Public Act 24-58; amended by Public Act 26-72 (HB 5562, 2026)
+    citation: Conn. Gen. Stat. §§ 42-337 and 42-338
+    status: in_force
+    effective: 2024-07-01
+    url: https://www.cga.ct.gov/CURRENT/PUB/chap_743q.htm
+    summary: >-
+      Every company that sells or leases wheelchairs in Connecticut must repair the wheelchairs it
+      sold or leased "timely": as soon as practicable and no later than ten business days after you
+      ask, not counting time spent waiting for prior authorization or for parts. Dealers must keep a
+      phone line and email for repair requests that work every business day, respond within one
+      business day, order parts within three business days, and repair complex rehabilitation
+      technology wheelchairs at your home if you ask. Since July 1, 2026 (Public Act 26-72) they must
+      also tell you these rights in writing when you buy or lease a chair, and on their website.
+    applies_to: [supplier]
+
+  - id: medicaid-no-prior-auth
+    title: No prior authorization for Medicaid wheelchair repairs
+    bill: SB 308 (2024), Public Act 24-58, § 3
+    citation: Conn. Gen. Stat. § 17b-278i(b)
+    status: in_force
+    effective: 2024-07-01
+    url: https://www.cga.ct.gov/2024/ACT/PA/PDF/2024PA-00058-R00SB-00308-PA.PDF
+    summary: >-
+      Connecticut Medicaid (HUSKY Health) may not require a new prescription or prior authorization
+      for the medically necessary repair of a customized wheelchair, unless the original
+      prescription is more than five years old.
+    applies_to: [medicaid]
+
+  - id: insurance-no-prior-auth
+    title: No prior authorization for complex rehab wheelchair repairs (private insurance)
+    bill: SB 308 (2024), Public Act 24-58, §§ 5 and 6
+    citation: Public Act 24-58, §§ 5–6
+    status: in_force
+    effective: 2025-01-01
+    url: https://www.cga.ct.gov/2024/ACT/PA/PDF/2024PA-00058-R00SB-00308-PA.PDF
+    summary: >-
+      Individual and group health insurance policies issued or renewed in Connecticut on or after
+      January 1, 2025 may not require a new prescription or prior authorization for the medically
+      necessary repair or replacement of a complex rehabilitation technology wheelchair, unless the
+      original prescription is more than five years old.
+    applies_to: [insurer]
+
+  - id: assistive-device-warranty
+    title: Assistive technology device warranty law
+    bill: Public Act 97-100
+    citation: Conn. Gen. Stat. § 42-331
+    status: in_force
+    url: https://www.cga.ct.gov/CURRENT/PUB/chap_743q.htm
+    summary: >-
+      For a defect during the warranty or within two years of delivery, the manufacturer must repair
+      the wheelchair. If the repair takes more than ten business days, the manufacturer must pay the
+      reasonable daily cost of an equivalent device. After three repair attempts for the same defect,
+      or 30 days out of service, you can ask for a replacement or refund.
+    applies_to: [manufacturer, supplier]
+
+deadlines:
+  - id: timely-repair
+    law: pa-24-58
+    title: Repair within 10 business days
+    who: supplier
+    description: >-
+      The dealer must repair your wheelchair as soon as practicable, and no later than ten business
+      days after you asked. Days spent waiting for insurance approval, or for parts the dealer
+      ordered, don't count, so Rollfix pauses the clock while you log that you're waiting. The law
+      also expects you to make the chair available for the repair.
+    quote: >-
+      "Timely repair" means as soon as practicable but not later than ten business days after the
+      date of request for repair from a consumer, provided (A) the consumer makes the wheelchair
+      available, (B) any prior authorization required from an insurer has been acquired, and (C) any
+      time spent waiting for prior authorization from an insurer or for delivery of necessary parts
+      ordered for the repair by an authorized wheelchair dealer shall not be included in the ten
+      business days.
+    starts:
+      events: [reported]
+      label: you asked for the repair
+    period: { days: 10, count: business }
+    pauses:
+      - from: auth_requested
+        until: [auth_approved, auth_denied]
+        label: waiting for prior authorization
+      - from: parts_ordered
+        until: [parts_arrived]
+        label: waiting for parts
+    met_by: [repaired]
+    met_label: the repair
+    recipients: [supplier, agency]
+    letter: >-
+      Connecticut law requires a wheelchair dealer to repair a wheelchair it sold or leased as soon
+      as practicable and no later than ten business days after the request, not counting time spent
+      waiting for prior authorization or for parts the dealer ordered ({{law_citation}}). I asked for
+      this repair on {{start_date}}.{{#if status == "missed"}} Even leaving out any time spent
+      waiting for approval or parts, the ten business days ended on {{due_date}}. The repair is
+      {{days_late}} late.{{/if}}{{#if status == "met_late"}} Even leaving out any time spent waiting
+      for approval or parts, the ten business days ended on {{due_date}}; the repair was finished
+      {{days_late}} late, on {{met_date}}.{{/if}}{{#if status == "running"}} Leaving out any time
+      spent waiting for approval or parts, the repair must be finished by {{due_date}}.{{/if}}{{#if
+      status == "due_today"}} Today is the last of the ten business days.{{/if}}{{#if status ==
+      "paused"}} {{days_used}} of the ten business days had passed before the clock stopped for
+      {{paused_for}} on {{paused_since}}. Please tell me how long that wait is expected to
+      last.{{/if}}
+
+  - id: order-parts
+    law: pa-24-58
+    title: Order parts within 3 business days
+    who: supplier
+    description: >-
+      Once the dealer has assessed what the chair needs, or once insurance has approved the repair,
+      it has three business days to order the parts.
+    quote: >-
+      The authorized wheelchair dealer shall ... order parts for a repair not later than three
+      business days after assessing the need for the repair or after receiving prior authorization
+      from an insurer for the repair.
+    starts:
+      events: [visit, auth_approved]
+      when: last
+      label: the chair was assessed or insurance approved the repair
+    period: { days: 3, count: business }
+    pauses:
+      - from: auth_requested
+        until: [auth_approved, auth_denied]
+        label: waiting for prior authorization
+    met_by: [parts_ordered, repaired]
+    met_label: ordering the parts
+    recipients: [supplier, agency]
+    letter: >-
+      The dealer must also order parts no later than three business days after assessing the need
+      for the repair or after receiving prior authorization ({{law_citation}}).{{#if status ==
+      "missed"}} By my count that was due by {{due_date}}, and I have no record that the parts were
+      ordered.{{/if}}{{#if status == "met_late"}} The parts were not ordered until {{met_date}},
+      {{days_late}} after the {{due_date}} deadline.{{/if}}{{#if status == "running"}} By my count the
+      parts must be ordered by {{due_date}}. Please tell me when they are ordered and the expected
+      delivery date.{{/if}}{{#if status == "due_today"}} Today is the last day to order the
+      parts.{{/if}}
+
+protections:
+  - id: response-and-home-repair
+    law: pa-24-58
+    title: An answer within one business day, and repairs at home
+    description: >-
+      The dealer must keep a phone line and email address for repair requests that work every
+      business day, respond to a repair request within one business day, and repair a complex
+      rehabilitation technology wheelchair at your home if you ask.
+    recipients: [supplier, agency]
+    letter: >-
+      Connecticut law also requires a dealer to keep a phone line and email address for repair
+      requests, to respond to a repair request within one business day, and to repair a complex
+      rehabilitation technology wheelchair at the consumer's home on request ({{law_citation}}).
+
+  - id: medicaid-no-prior-auth
+    law: medicaid-no-prior-auth
+    title: Medicaid can't require prior authorization for the repair
+    description: >-
+      If HUSKY Health (Connecticut Medicaid) pays, it may not require a new prescription or prior
+      authorization for a medically necessary repair of a customized wheelchair, unless the original
+      prescription is more than five years old.
+    applies_if: { payers: [medicaid, medicaid_managed_care, dual] }
+    letter: >-
+      Since July 1, 2024, Connecticut Medicaid may not require a new prescription or prior
+      authorization for the medically necessary repair of a customized wheelchair, unless the
+      original prescription is more than five years old ({{law_citation}}). Waiting for prior
+      authorization should not be holding up this repair.
+
+  - id: insurance-no-prior-auth
+    law: insurance-no-prior-auth
+    title: Private insurance can't require prior authorization for complex rehab chairs
+    description: >-
+      For individual and group health insurance issued or renewed on or after January 1, 2025, the
+      insurer may not require a new prescription or prior authorization for the medically necessary
+      repair or replacement of a complex rehabilitation technology wheelchair, unless the original
+      prescription is more than five years old.
+    applies_if: { payers: [private] }
+    letter: >-
+      For health insurance policies issued or renewed in Connecticut on or after January 1, 2025,
+      an insurer may not require a new prescription or prior authorization for the medically
+      necessary repair or replacement of a complex rehabilitation technology wheelchair, unless the
+      original prescription is more than five years old ({{law_citation}}).
+
+  - id: warranty-loaner-costs
+    law: assistive-device-warranty
+    title: Loaner costs for long warranty repairs
+    description: >-
+      If the chair is under warranty, or less than two years old, and a repair takes more than ten
+      business days, the manufacturer must pay the reasonable daily cost of an equivalent device.
+    recipients: [supplier]
+    letter: >-
+      If my chair is still under warranty or within two years of delivery, Connecticut's assistive
+      technology device law also requires the manufacturer to reimburse the reasonable daily cost of
+      an equivalent device once a repair takes more than ten business days ({{law_citation}}).
+
+agencies:
+  - id: healthcare-advocate
+    name: Office of the Healthcare Advocate
+    handles: >-
+      Wheelchair repair delays and complaints. State law makes this office responsible for receiving
+      and recording complaints about timely repair.
+    url: https://ct.accessgov.com/wheelchair-repair-and-complaints/Forms/Page/wheelchair-repair-and-complaints/wheelchair-form/1
+    phone: 1-866-466-4446
+
+# Business days skip weekends and Connecticut's legal holidays (C.G.S. § 1-4): the federal list plus
+# Lincoln Day. Days the Governor proclaims each year (such as Good Friday) are not included.
+holidays:
+  extends: [us-federal]
+  add:
+    - id: lincoln-day
+      name: Lincoln Day
+      date: { month: 2, day: 12 }
+
+sources:
+  - label: Conn. Gen. Stat. chapter 743q (§§ 42-330 to 42-339)
+    url: https://www.cga.ct.gov/CURRENT/PUB/chap_743q.htm
+  - label: Public Act 24-58 (SB 308, 2024)
+    url: https://www.cga.ct.gov/2024/ACT/PA/PDF/2024PA-00058-R00SB-00308-PA.PDF
+  - label: Public Act 26-72 (HB 5562, 2026), §§ 14–15
+    url: https://www.cga.ct.gov/2026/ACT/PA/PDF/2026PA-00072-R00HB-05562-PA.PDF
+  - label: Office of the Healthcare Advocate
+    url: https://portal.ct.gov/oha
+  - label: Conn. Gen. Stat. § 1-4 (legal holidays)
+    url: https://www.cga.ct.gov/current/pub/chap_002.htm

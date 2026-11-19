@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=../../schema/jurisdiction.schema.json
+schema_version: 1
+id: NV
+name: Nevada
+last_checked: 2026-11-19
+summary: >-
+  Nevada's 2025 wheelchair right-to-repair law requires manufacturers of powered and manual
+  wheelchairs, scooters and power-assist devices to make parts, tools and manuals available. Nevada
+  law sets no repair deadline for suppliers.
+
+laws:
+  - id: ab-407
+    title: Right to repair mobility devices
+    bill: AB 407 (2025)
+    citation: NRS 597.267 to 597.2697
+    status: in_force
+    url: https://www.leg.state.nv.us/NRS/NRS-597.html
+    summary: >-
+      Manufacturers of mobility devices, including powered and manual wheelchairs, mobility scooters
+      and power-assist devices, must make documentation, parts and tools available to owners and
+      independent repair providers on fair and reasonable terms. A violation is a deceptive trade
+      practice (NRS 597.2697).
+    applies_to: [manufacturer]
+
+protections:
+  - id: right-to-repair
+    law: ab-407
+    title: Parts, tools and manuals must be available
+    description: >-
+      Manufacturers must make parts, tools and documentation available to you or an independent
+      repair shop on fair and reasonable terms.
+    recipients: [supplier, agency]
+    letter: >-
+      Nevada law requires wheelchair manufacturers to make documentation, parts and tools available
+      to owners and independent repair providers on fair and reasonable terms, and a violation is a
+      deceptive trade practice ({{law_citation}}). If parts are holding up this repair, please tell
+      me which parts are needed and from which manufacturer.
+
+agencies:
+  - id: attorney-general
+    name: Nevada Attorney General's Office
+    handles: Consumer complaints, including deceptive trade practices.
+    url: https://ag.nv.gov/Complaints/CSU_Complaints___FAQ/
+
+sources:
+  - label: NRS chapter 597
+    url: https://www.leg.state.nv.us/NRS/NRS-597.html

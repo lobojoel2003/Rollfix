@@ -1,0 +1,120 @@
+# yaml-language-server: $schema=../schema/letter.schema.json
+# The letter to the company that sold or rents the chair and does the repairs.
+# Template language: {{name}} inserts a value; {{#if name}} ... {{/if}} shows text only
+# when a value is set; {{#unless name}} is the opposite. A single line break is a space,
+# a blank line starts a new paragraph. See rules/README.md for every name you can use.
+schema_version: 1
+id: supplier
+recipient: supplier
+title: Letter to your supplier
+description: >-
+  Ask the company doing the repair for a firm repair date, a loaner chair and a written answer.
+  Lists every missed promise and the state rules they have to follow.
+response_days: 7
+options:
+  - id: ask_repair_date
+    label: Ask for a repair date in writing
+    default: true
+  - id: ask_loaner
+    label: Ask for a loaner chair until it is fixed
+    help: Left out automatically if your timeline shows you already have one.
+    default: true
+  - id: ask_records
+    label: Ask for copies of the work order and insurance paperwork
+    default: false
+  - id: mention_escalation
+    label: Say you will ask your insurer and the state for help if they don't answer
+    default: true
+subject: >-
+  {{#if is_fixed}}Delay in repairing my power wheelchair ({{days_without}}){{else}}Repair of my
+  power wheelchair: day {{day_number}} without it{{/if}}
+body: |
+  Dear {{supplier_name}} service team,
+
+  I am writing about the repair of my {{chair}}{{#if chair_serial}} (serial number
+  {{chair_serial}}){{/if}}. It stopped working on {{broke_date}}{{#if problem}} because of a
+  problem with {{problem}}{{/if}}.{{#if problem_details}} {{problem_details}}{{/if}}
+
+  {{#if is_fixed}}
+  The chair was repaired on {{fixed_date}}, after {{days_without}} without it. I am writing so
+  that there is a written record of what happened.
+  {{else}}
+  {{#if is_stranded}}I cannot use my chair at all.{{/if}}{{#if is_unsafe}}The chair still runs,
+  but it is not safe to use.{{/if}}{{#if is_limited}}The chair works only partly.{{/if}} Today is
+  day {{day_number}} without a working chair.
+  {{/if}}
+
+  {{#if has_reported}}
+  I first reported the problem to you on {{reported_date}}. Since then I have been in touch with
+  your company {{contact_count}} about this repair. A dated timeline of every call, visit and
+  message is enclosed.
+  {{else}}
+  A dated timeline of every call, visit and message about this repair is enclosed.
+  {{/if}}
+
+  {{#if has_missed_promises}}
+  I was given dates that were not met:
+
+  {{missed_promises}}
+  {{/if}}
+
+  {{#if auth_pending}}
+  My records show the repair was sent to {{payer_name}} for approval on {{auth_requested_date}}.
+  Please make sure the insurer has everything it needs, and follow up with them.
+  {{/if}}
+
+  {{#if parts_pending}}
+  Parts were ordered on {{parts_ordered_date}}. Please tell me when they are expected to arrive
+  and give me the order or tracking number.
+  {{/if}}
+
+  {{#if impact}}
+  {{impact}}
+  {{/if}}
+
+  {{#if impact_list}}
+  The delay has already affected me in these ways:
+
+  {{impact_list}}
+  {{/if}}
+
+  {{#if has_state_rules}}
+  {{state_rules}}
+  {{/if}}
+
+  {{#unless is_fixed}}
+  I am asking you to:
+
+  {{#if ask_repair_date}}
+  - Tell me in writing the date the repair will be finished, and what, if anything, is holding it
+  up.
+  {{/if}}
+
+  {{#if ask_loaner}}
+  {{#unless has_loaner}}
+  - Provide a loaner chair that meets my needs until my own chair is repaired.
+  {{/unless}}
+  {{/if}}
+
+  {{#if ask_records}}
+  - Send me copies of the work order, the technician's notes and anything you have sent to my
+  insurer about this repair.
+  {{/if}}
+
+  - Give me the name and direct phone number of the person responsible for my repair.
+  {{/unless}}
+
+  {{#if ask_records}}
+  {{#if is_fixed}}
+  Please send me copies of the work order, the technician's notes and anything you sent to my
+  insurer about this repair.
+  {{/if}}
+  {{/if}}
+
+  Please reply in writing by {{response_date}}.{{#if mention_escalation}} If I have not heard from
+  you by then, I will ask {{payer_name}} and the {{state_name}} offices that oversee wheelchair
+  repairs for help.{{/if}}
+
+  Thank you for your prompt attention. You can reach me{{#if has_phone}} at {{my_phone}}{{/if}}{{#if
+  has_email}}{{#if has_phone}} or{{/if}} at {{my_email}}{{/if}}{{#unless has_phone}}{{#unless
+  has_email}} at the address above{{/unless}}{{/unless}}.

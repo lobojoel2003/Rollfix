@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=../schema/letter.schema.json
+# The complaint to a state office (attorney general, consumer protection, insurance or
+# Medicaid agency) or to Medicare.
+schema_version: 1
+id: agency
+recipient: agency
+title: Complaint to the state
+description: >-
+  File a written complaint with the office that oversees suppliers, insurers or Medicaid in
+  your state. It sets out the dates, the missed promises and the rules that apply.
+response_days: 30
+options:
+  - id: ask_contact_supplier
+    label: Ask them to contact the supplier
+    default: true
+  - id: ask_contact_payer
+    label: Ask them to contact your insurer too
+    default: false
+  - id: ask_record
+    label: Ask them to record the delay for oversight of repair times
+    default: true
+subject: >-
+  Complaint about a power wheelchair repair delay: {{#if is_fixed}}{{days_without}} without my
+  chair{{else}}day {{day_number}} without my chair{{/if}}
+body: |
+  Dear {{recipient_name}}:
+
+  I am filing a complaint about the delay in repairing my power wheelchair. The chair stopped
+  working on {{broke_date}}{{#if problem}} because of a problem with {{problem}}{{/if}}.
+  {{#if is_fixed}}It was not repaired until {{fixed_date}}, after {{days_without}}.{{else}}{{#if
+  is_stranded}}I cannot use it at all.{{/if}}{{#if is_unsafe}}It still runs, but it is not safe to
+  use.{{/if}}{{#if is_limited}}It works only partly.{{/if}} Today is day {{day_number}}, and it is
+  still not repaired.{{/if}}
+
+  The supplier responsible for the repair is {{supplier_name}}{{#if account_number}} (my account
+  number is {{account_number}}){{/if}}. My insurance is {{payer_name}}{{#if member_id}} (member ID
+  {{member_id}}){{/if}}.
+
+  {{#if has_reported}}
+  I reported the problem to the supplier on {{reported_date}}. Since then I have been in touch
+  with them {{contact_count}}.
+  {{/if}}
+
+  {{#if has_missed_promises}}
+  I was given dates that were not met:
+
+  {{missed_promises}}
+  {{/if}}
+
+  {{#if auth_pending}}
+  The repair was sent to {{payer_name}} for approval on {{auth_requested_date}}, and as far as I
+  know no decision has been made.
+  {{/if}}
+
+  {{#if has_state_rules}}
+  {{state_rules}}
+  {{/if}}
+
+  {{#if impact}}
+  {{impact}}
+  {{/if}}
+
+  {{#if impact_list}}
+  The delay has affected me in these ways:
+
+  {{impact_list}}
+  {{/if}}
+
+  I am asking your office to:
+
+  - Review this complaint and tell me in writing what you will do about it.
+
+  {{#if ask_contact_supplier}}
+  - Contact {{supplier_name}} about {{#if is_fixed}}why the repair took so long{{else}}repairing my
+  chair without further delay{{/if}}.
+  {{/if}}
+
+  {{#if ask_contact_payer}}
+  - Contact {{payer_name}} about its part in the delay.
+  {{/if}}
+
+  {{#if ask_record}}
+  - Record this delay so it is counted in any review of wheelchair repair times in
+  {{state_name}}.
+  {{/if}}
+
+  A dated timeline of every call, visit and message about this repair is enclosed. I can send
+  copies of emails, letters or other records on request.
+
+  Thank you for your help. You can reach me{{#if has_phone}} at {{my_phone}}{{/if}}{{#if
+  has_email}}{{#if has_phone}} or{{/if}} at {{my_email}}{{/if}}{{#unless has_phone}}{{#unless
+  has_email}} at the address above{{/unless}}{{/unless}}.

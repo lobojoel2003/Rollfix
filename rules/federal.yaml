@@ -1,0 +1,99 @@
+# yaml-language-server: $schema=../schema/jurisdiction.schema.json
+# Federal Medicare rules. They apply in every state when Medicare (or a Medicare Advantage plan)
+# pays for the chair or its repairs.
+schema_version: 1
+id: US
+name: Medicare
+last_checked: 2026-11-19
+summary: >-
+  When Medicare pays, federal supplier standards apply everywhere: suppliers must respond to
+  complaints and keep a complaint log, repair rented equipment at no charge, and not charge you for
+  warranty repairs. Medicare pays for reasonable and necessary repairs of equipment you own.
+
+laws:
+  - id: supplier-standards
+    title: Medicare DMEPOS supplier standards
+    bill: Federal regulation
+    citation: 42 C.F.R. § 424.57(c)
+    status: in_force
+    url: https://www.ecfr.gov/current/title-42/section-424.57
+    summary: >-
+      Every supplier that bills Medicare for durable medical equipment must meet these standards,
+      including answering questions and responding to complaints, keeping a complaint resolution
+      process and complaint records, repairing rented items at no charge, and not charging for
+      warranty repairs.
+    applies_to: [supplier]
+
+  - id: repairs-of-owned-equipment
+    title: Medicare payment for repairs of equipment you own
+    bill: Federal regulation
+    citation: 42 C.F.R. § 414.210(e)
+    status: in_force
+    url: https://www.ecfr.gov/current/title-42/section-414.210
+    summary: >-
+      Medicare pays the reasonable and necessary charges for maintaining and servicing
+      beneficiary-owned equipment, for parts and labor not covered by a manufacturer's or supplier's
+      warranty.
+    applies_to: [medicare]
+
+protections:
+  - id: complaints
+    law: supplier-standards
+    title: Suppliers must respond to complaints and keep records
+    description: >-
+      A Medicare supplier must answer your questions and respond to your complaints, have a
+      complaint resolution process, and keep records of written and phone complaints.
+    applies_if: { payers: [medicare, dual, medicare_advantage] }
+    recipients: [supplier, agency]
+    letter: >-
+      As a Medicare supplier, you must answer questions and respond to complaints about the
+      Medicare-covered items you sold or rented, have a complaint resolution protocol, and keep
+      records of written and oral complaints (42 C.F.R. § 424.57(c)(13), (19) and (20)). Please
+      treat this letter as a written complaint.
+
+  - id: rented-items
+    law: supplier-standards
+    title: Rented equipment must be repaired at no charge
+    description: >-
+      If Medicare is still renting the chair, the supplier must maintain and repair it at no charge,
+      and it must work as intended afterwards.
+    applies_if: { payers: [medicare, dual, medicare_advantage] }
+    recipients: [supplier, agency]
+    letter: >-
+      If my chair is still a Medicare rental, you must maintain and repair or replace it at no
+      charge, and it "must function as required and intended after being repaired or replaced" (42
+      C.F.R. § 424.57(c)(14)). If it is under warranty, you may not charge me or Medicare for the
+      repair (42 C.F.R. § 424.57(c)(6)).
+
+  - id: owned-repairs
+    law: repairs-of-owned-equipment
+    title: Medicare pays for repairs of equipment you own
+    description: >-
+      Medicare covers reasonable and necessary repairs, parts and labor for a chair you own, when
+      they aren't covered by a warranty.
+    applies_if: { payers: [medicare, dual, medicare_advantage] }
+    recipients: [supplier, insurer]
+    letter: >-
+      Medicare pays the reasonable and necessary charges for maintenance and servicing of
+      beneficiary-owned equipment, for parts and labor not covered by a warranty ({{law_citation}}).
+
+agencies:
+  - id: medicare
+    name: Medicare
+    handles: >-
+      Complaints about a Medicare supplier. Call 1-800-MEDICARE (1-800-633-4227, TTY
+      1-877-486-2048), or file a complaint online.
+    url: https://www.medicare.gov/providers-services/claims-appeals-complaints/complaints
+    phone: 1-800-633-4227
+    applies_if: { payers: [medicare, dual, medicare_advantage] }
+
+holidays:
+  extends: [us-federal]
+
+sources:
+  - label: 42 C.F.R. § 424.57 (eCFR)
+    url: https://www.ecfr.gov/current/title-42/section-424.57
+  - label: 42 C.F.R. § 414.210 (eCFR)
+    url: https://www.ecfr.gov/current/title-42/section-414.210
+  - label: Medicare.gov, Filing a complaint
+    url: https://www.medicare.gov/providers-services/claims-appeals-complaints/complaints
